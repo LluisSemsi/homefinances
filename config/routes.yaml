@@ -1,0 +1,60 @@
+controllers:
+    resource:
+        path: ../src/Controller/
+        namespace: App\Controller
+    type: attribute
+
+# -------------------------------- #
+#  Rutas para el manejo de usuarios
+# -------------------------------- #
+
+#Registrar usuario
+register:
+    path: /register
+    controller: App\Controller\RegisterController::index
+
+logout:
+    path: /logout
+    controller: App\Controller\LogoutController::logout
+
+# -------------------------------- #
+#         Rutas error              #
+# -------------------------------- #
+
+error:
+    path: /error/{code}
+    controller: App\Controller\ErrorController::main
+
+
+# -------------------------------- #
+#         Rutas aplicación         #
+# -------------------------------- #
+
+#Página principal
+home:
+    path: /
+    controller: App\Controller\HomeController::home
+
+panel_home:
+    path: /panel-home
+    controller: App\Controller\PanelController::home
+
+crear-cuentas-bancarias:
+    path: /crear-cuentas-bancarias
+    controller: App\Controller\PanelController::crear_cuentas_bancarias
+
+add-movimientos:
+    path: /add-movimientos/{iban}
+    controller: App\Controller\PanelController::add_movimientos
+
+editar-cuenta:
+    path: /editar-cuenta/{iban}
+    controller: App\Controller\PanelController::editar_cuenta
+
+eliminar-cuenta:
+    path: /eliminar-cuenta/{iban}
+    controller: App\Controller\PanelController::eliminar_cuenta
+
+confirmar-eliminar-cuenta:
+    path: /confirmar-eliminar-cuenta/{iban}
+    controller: App\Controller\PanelController::confirmar_eliminar_cuenta

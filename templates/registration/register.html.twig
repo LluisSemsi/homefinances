@@ -1,0 +1,25 @@
+{% extends 'base/base.html.twig' %}
+
+{% block title %}HomeFinances{% endblock %}
+
+{% block body %}
+    
+
+    <div id="home-container">
+        {{ form_errors(registrationForm) }}
+
+        <img src="{{ asset('images/logo-texto-lateral-azul.png') }}" alt="Logo Home Finances" class="logo">
+
+        {{ form_start(registrationForm, { attr: {class: 'card'}}) }}
+            {{ form_row(registrationForm.email) }}
+            {{ form_row(registrationForm.username) }}
+            {{ form_row(registrationForm.plainPassword, {
+                label: 'Password'
+            }) }}
+            {{ form_row(registrationForm.agreeTerms) }}
+
+            <button type="submit" class="btn btn-primary">Register</button>
+        {{ form_end(registrationForm) }}
+    </div>
+
+{% endblock %}

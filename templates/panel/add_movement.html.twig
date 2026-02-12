@@ -1,0 +1,35 @@
+{% extends 'base/base.html.twig' %}
+
+{% block title %}Tu panel{% endblock %}
+
+{% block body %}
+
+    {{ include('panel/templates/header.html.twig') }}
+
+    {{ include('panel/templates/sidebar.html.twig') }}
+
+    <main class="content">
+
+       {{ form_errors(add_movement_form) }}
+
+        {{ form_start(add_movement_form, { attr: {class: 'card', id: "form-create-bank-movement"}}) }}
+            <h1 class="titulo-panel"> Añadir nuevo movimiento bancario</h1>
+            <p class="text-panel">Se creará un nuevo movimiento en la cuenta: <b>{{ nombre_banco }}</b></p>
+            {{ form_row(add_movement_form.cantidad, { attr: {id: "cantidad"}}) }}
+            {{ form_row(add_movement_form.concepto) }}
+            {{ form_row(add_movement_form.fecha) }}
+
+            <button type="submit" class="btn btn-primary">Añadir movimiento</button>
+        {{ form_end(add_movement_form) }}
+        
+    </main>
+
+    <script>
+    
+
+    
+
+
+    </script>
+
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base/base.html.twig' %}
+
+{% block title %}Tu panel{% endblock %}
+
+{% block body %}
+
+    {{ include('panel/templates/header.html.twig') }}
+
+    {{ include('panel/templates/sidebar.html.twig') }}
+
+    <main class="content">
+
+        <h1>{{ error_message }}</h1>
+        
+    </main>
+    <script>
+
+        function toggleDropdown(iban) {
+            const dropdown = document.getElementById("dropdownMenu_" + iban);
+            dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+          }
+
+    </script>
+{% endblock %}

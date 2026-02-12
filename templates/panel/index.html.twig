@@ -1,0 +1,92 @@
+{% extends 'base/base.html.twig' %}
+
+{% block title %}Tu panel{% endblock %}
+
+{% block body %}
+
+    {{ include('panel/templates/header.html.twig') }}
+
+    {{ include('panel/templates/sidebar.html.twig') }}
+
+    <main class="content">
+
+        <a href="{{ path('crear-cuentas-bancarias') }}" class="boton-flotante-nueva-cuenta">+</a>
+
+        <div class="card-grid">
+
+            {% if num_cuentas_usuario <= 0 %}
+            
+                <div class="card">
+                
+                    <div class="no-cuentas">
+                        <div id="cont-img-no-cuentas">
+                            <img src="{{ asset('images/caja_fuerte_vacia.png') }}" alt="No hay cuentas">
+                        </div>
+                        <div class="no-cuentas-texto">
+                            <h1 class="titulo-panel">Bienvenido {{ user.username }}</h1>
+                            <p class="text-panel">Vemos que no tienes aun ninguna cuenta bancaria asociada. Es el momento de empezar. Pulsa el siguiente botón y empezamos a crearte cuentas.</p>
+                            <div class="cont-boton-no-cuentas">
+                                <a href="{{ path('crear-cuentas-bancarias') }}"><button class="btn btn-primary">Crear cuentas</button></a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            {% else %}
+                
+                {% for cuenta in cuentas_bancarias %}
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">{{ cuenta.getNombreBanco() }}</span>
+                            <span class="card-icon">{{ cuenta.getSaldo() }}€</span>
+                        </div>
+                        <div class="card-body">
+                            <h4 class="subtitle-card">Últimos movimientos</h4>
+                            {% if cuenta.getMovimientosBancarios()|length == 0 %}
+                                <span class="span-card">No hay movimientos registrados en la cuenta</span>
+                            {% else %}
+                                <div class="cont-movimientos-home">
+                                {% for movimiento in cuenta.getMovimientosBancarios()|reverse|slice(0,3) %}
+                                    <div class="cont-movimiento">
+                                        <div class="cont-fecha">
+                                            <p>{{ movimiento.getFecha()|date('d/m/Y H:i') }}</p>
+                                        </div>
+                                        <div class="cont-concepto">
+                                            <p>{{ movimiento.getConcepto() }}</p>
+                                        </div>
+                                        <div class="cont-importe">
+                                            <p>{{ movimiento.getCantidad() }}€</p>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                                </div>
+                            {% endif %}
+                        
+                            <button class="menu-button" onclick="toggleDropdown('{{ cuenta.getIban() }}')">⋮</button>
+                            <div class="dropdown" id="dropdownMenu_{{ cuenta.getIban() }}">
+                                <a href="{{ path('add-movimientos', { iban: cuenta.getIban() }) }}">Añadir Movimientos</a>
+                                <a href="{{ path('editar-cuenta', { iban: cuenta.getIban() }) }}">Editar Cuenta</a>
+                                <a href="{{ path('eliminar-cuenta', { iban: cuenta.getIban() }) }}">Eliminar Cuenta</a>
+                            </div>
+
+                        </div>
+                    </div>
+
+                {% endfor %}
+
+            {% endif %}
+
+            
+        </div>
+    </main>
+    <script>
+
+        function toggleDropdown(iban) {
+            const dropdown = document.getElementById("dropdownMenu_" + iban);
+            dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+          }
+
+    </script>
+{% endblock %}

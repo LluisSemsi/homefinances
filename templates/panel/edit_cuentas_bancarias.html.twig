@@ -1,0 +1,29 @@
+{% extends 'base/base.html.twig' %}
+
+{% block title %}Tu panel{% endblock %}
+
+{% block body %}
+
+    {{ include('panel/templates/header.html.twig') }}
+
+    {{ include('panel/templates/sidebar.html.twig') }}
+
+    <main class="content">
+
+       {{ form_errors(EditAccountForm) }}
+
+        {{ form_start(EditAccountForm, { attr: {class: 'card', id: "form-create-bank-account"}}) }}
+            <h1 class="titulo-panel">Editar cuenta bancaria</h1>
+            <p class="text-panel">Puedes cambiar el nombre del titular y el nombre asociado a la cuenta del siguiente <b>IBAN</b>:</p>
+            <p class="text-panel">{{ iban }}</p>
+            {{ form_row(EditAccountForm.nombre_banco) }}
+            {{ form_row(EditAccountForm.titular) }}
+
+            <button type="submit" class="btn btn-primary">Añadir cuenta</button>
+        {{ form_end(EditAccountForm) }}
+        
+    </main>
+
+   
+
+{% endblock %}

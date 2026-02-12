@@ -1,0 +1,70 @@
+{% extends 'base/base.html.twig' %}
+
+{% block title %}Tu panel{% endblock %}
+
+{% block body %}
+
+    {{ include('panel/templates/header.html.twig') }}
+
+    {{ include('panel/templates/sidebar.html.twig') }}
+
+    <main class="content">
+
+       {{ form_errors(newAccountForm) }}
+
+        {{ form_start(newAccountForm, { attr: {class: 'card', id: "form-create-bank-account"}}) }}
+            <h1 class="titulo-panel">Crear nueva cuenta bancaria</h1>
+            <p class="text-panel">Creará una nueva cuenta bancaria y la asociará a tu usuario y puedes asociarla a otro usuario de la plataforma</p>
+            {{ form_row(newAccountForm.iban, { attr: {id: "iban"}}) }}
+            {{ form_row(newAccountForm.nombre_banco) }}
+            {{ form_row(newAccountForm.titular) }}
+            {{ form_row(newAccountForm.usuario_asociado, { attr: {class: 'select-bootstrap'}}) }}
+
+            <button type="submit" class="btn btn-primary">Añadir cuenta</button>
+        {{ form_end(newAccountForm) }}
+        
+    </main>
+
+    <script>
+    
+
+    function isValidIBAN(iban) {
+        iban = iban.replace(/\s+/g, '').toUpperCase();
+        if (!/^[A-Z0-9]+$/.test(iban)) return false;
+
+        // Mueve los 4 primeros caracteres al final
+        iban = iban.slice(4) + iban.slice(0, 4);
+
+        // Reemplaza letras por números (A=10, B=11, ..., Z=35)
+        iban = iban.replace(/[A-Z]/g, function(ch) {
+            return ch.charCodeAt(0) - 55;
+        });
+
+        // Calcula el módulo 97
+        let remainder = iban;
+        while (remainder.length > 2) {
+            let block = remainder.slice(0, 9);
+            remainder = (parseInt(block, 10) % 97) + remainder.slice(block.length);
+        }
+
+        return parseInt(remainder, 10) % 97 === 1;
+    }
+
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        const ibanInput = document.getElementById('create_account_form_iban');
+        ibanInput.addEventListener('blur', function () {
+            const isValid = isValidIBAN(ibanInput.value);
+            if (!isValid) {
+                console.log('El IBAN introducido no es válido.');
+                ibanInput.classList.add('is-invalid');
+            } else {
+                ibanInput.classList.remove('is-invalid');
+            }
+        });
+    });
+
+
+    </script>
+
+{% endblock %}

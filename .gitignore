@@ -1,0 +1,32 @@
+# Cache and logs
+/var/cache/
+/var/log/
+
+# Environment variables
+.env.local
+.env.local.php
+.env.*.local
+
+# Composer vendor directory
+/vendor/
+
+# Symfony binary
+/.symfony
+
+# PHPUnit
+/phpunit.xml
+/phpunit.xml.dist
+/.phpunit.result.cache
+
+# IDE files
+/.idea/
+/.vscode/
+/*.iml
+
+# Node / frontend
+/node_modules/
+/public/build/
+/public/bundles/
+
+# Misc
+/.DS_Store
