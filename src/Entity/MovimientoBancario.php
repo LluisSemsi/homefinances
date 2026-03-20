@@ -21,29 +21,40 @@ class MovimientoBancario
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $concepto = null;
 
-    #[ORM\Column]
-    private ?\DateTime $fecha = null;
+    #[ORM\Column(type: 'date')]
+    private ?\DateTimeInterface $fecha = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    private ?string $saldo_actual = null;
+
+    #[ORM\Column(length: 32, unique: true)]
+    private ?string $hash = null;
+
 
     #[ORM\ManyToOne(inversedBy: 'movimientosBancarios')]
-    #[ORM\JoinColumn(name: 'cuenta_iban', referencedColumnName: 'iban', nullable: false)]
+    #[ORM\JoinColumn(nullable: false)]
     private ?CuentaBancaria $cuenta = null;
+
+    #[ORM\ManyToOne(inversedBy: 'movimientos')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?TipoMovimientoBancario $tipo = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getCantidad(): ?string
+    public function getCantidad(): ?float
     {
-        return $this->cantidad;
+        return $this->cantidad !== null ? (float) $this->cantidad : null;
     }
 
-    public function setCantidad(string $cantidad): static
+    public function setCantidad(float|string $cantidad): static
     {
-        $this->cantidad = $cantidad;
-
+        $this->cantidad = (string) $cantidad;
         return $this;
     }
+
 
     public function getConcepto(): ?string
     {
@@ -69,7 +80,29 @@ class MovimientoBancario
         return $this;
     }
 
-    public function getCuenta(): ?string
+    public function getSaldoActual(): ?float
+    {
+        return $this->saldo_actual !== null ? (float) $this->saldo_actual : null;
+    }
+
+    public function setSaldoActual(float|string $saldo_actual): static
+    {
+        $this->saldo_actual = (string) $saldo_actual;
+        return $this;
+    }
+
+    public function getHash(): ?string
+    {
+        return $this->hash;
+    }
+
+    public function setHash(string $hash): static
+    {
+        $this->hash = $hash;
+        return $this;
+    }
+
+    public function getCuenta(): ?CuentaBancaria
     {
         return $this->cuenta;
     }
@@ -80,4 +113,17 @@ class MovimientoBancario
 
         return $this;
     }
+
+    public function getTipo(): ?TipoMovimientoBancario
+    {
+        return $this->tipo;
+    }
+
+    public function setTipo(?TipoMovimientoBancario $tipo): static
+    {
+        $this->tipo = $tipo;
+
+        return $this;
+    }
+
 }

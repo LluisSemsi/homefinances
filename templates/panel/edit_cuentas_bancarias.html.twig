@@ -10,17 +10,30 @@
 
     <main class="content">
 
-       {{ form_errors(EditAccountForm) }}
+        <div id="edit-account-container">        
+            <h1 class="titulo-panel titulo">Editar datos de una cuenta</h1>
+            <p class="text-panel text">En este apartado puedes modificar los datos de una cuenta bancaria.</p>
+            <div class="datos-cuenta">
+                <div>
+                    <img src="{{ asset('images/icons/' ~ cuenta.getImage()) }}" alt="Logo Banco" class="logo-banco">
+                    <h2 class="subtitulo">{{ cuenta.getNombreBanco() }}</h2>
+                    <p class="text"> - </p>
+                    <p class="text">{{ cuenta.getAlias() }}</p>
+                    <p class="text"> - </p>
+                    <p class="text"><b>IBAN:</b> {{ cuenta.getIBAN() }}</p>                  
+                </div>   
+            </div>
 
-        {{ form_start(EditAccountForm, { attr: {class: 'card', id: "form-create-bank-account"}}) }}
-            <h1 class="titulo-panel">Editar cuenta bancaria</h1>
-            <p class="text-panel">Puedes cambiar el nombre del titular y el nombre asociado a la cuenta del siguiente <b>IBAN</b>:</p>
-            <p class="text-panel">{{ iban }}</p>
-            {{ form_row(EditAccountForm.nombre_banco) }}
-            {{ form_row(EditAccountForm.titular) }}
+            {{ form_errors(EditAccountForm) }}
 
-            <button type="submit" class="btn btn-primary">Añadir cuenta</button>
-        {{ form_end(EditAccountForm) }}
+            {{ form_start(EditAccountForm, { attr: {id: "form-create-bank-account"}}) }}
+                {{ form_row(EditAccountForm.nombre_banco) }}
+                {{ form_row(EditAccountForm.titular) }}
+                {{ form_row(EditAccountForm.alias) }}
+
+                <button type="submit" class="btn btn-primary">Editar cuenta</button>
+            {{ form_end(EditAccountForm) }}
+        </div>
         
     </main>
 

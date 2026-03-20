@@ -15,7 +15,11 @@ use App\Entity\ProductoInversion;
 class CuentaBancaria
 {
     #[ORM\Id]
-    #[ORM\Column(length: 34)]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    #[ORM\Column(length: 34, unique: true)]
     private ?string $iban = null;
 
     #[ORM\Column(length: 100)]
@@ -24,6 +28,12 @@ class CuentaBancaria
     #[ORM\Column(length: 100)]
     private ?string $titular = null;
 
+    #[ORM\Column(length: 50)]
+    private ?string $alias = null;
+
+    #[ORM\Column(length: 50)]
+    private ?string $image = null;
+
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     private ?string $saldo = null;
 
@@ -31,7 +41,7 @@ class CuentaBancaria
     #[ORM\JoinTable(
         name: 'cuenta_bancaria_user',
         joinColumns: [
-            new ORM\JoinColumn(name: 'cuenta_bancaria_iban', referencedColumnName: 'iban')
+            new ORM\JoinColumn(name: 'cuenta_id', referencedColumnName: 'id')
         ],
         inverseJoinColumns: [
             new ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id')
@@ -52,12 +62,18 @@ class CuentaBancaria
         $this->productosInversion = new ArrayCollection();
     }
 
-    public function getIBAN(): ?string
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+
+    public function getIban(): ?string
     {
         return $this->iban;
     }
 
-    public function setIBAN(string $iban): static
+    public function setIban(string $iban): static
     {
         $this->iban = $iban;
 
@@ -88,17 +104,42 @@ class CuentaBancaria
         return $this;
     }
 
-    public function getSaldo(): ?string
+    public function getAlias(): ?string
     {
-        return $this->saldo;
+        return $this->alias;
     }
 
-    public function setSaldo(string $saldo): static
+    public function setAlias(string $alias): static
     {
-        $this->saldo = $saldo;
+        $this->alias = $alias;
 
         return $this;
     }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(string $image): static
+    {
+        $this->image = $image;
+
+        return $this;
+    }
+
+    public function getSaldo(): ?float
+    {
+        return $this->saldo !== null ? (float) $this->saldo : null;
+    }
+
+    public function setSaldo(float|string $saldo): static
+    {
+        $this->saldo = (string) $saldo;
+
+        return $this;
+    }
+
 
     /** @return Collection<int, User> */
     public function getUsuarios(): Collection
@@ -134,7 +175,7 @@ class CuentaBancaria
         return $this;
     }
 
-    public function removeGasto(MovimientoBancario $movimientoBancario): self
+    public function removeMovimientosBancarios(MovimientoBancario $movimientoBancario): self
     {
         if ($this->movimientosBancarios->removeElement($movimientoBancario)) {
             if ($movimientoBancario->getCuenta() === $this) {

@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\ProductoInversionRepository;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -14,44 +13,45 @@ use App\Entity\FondoInversion;
 class ProductoInversion
 {
     #[ORM\Id]
+    #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $num_contrato = null;
+    private ?int $id = null;
+
+    #[ORM\Column(length: 50, unique: true)]
+    private ?string $numContrato = null;
 
     #[ORM\Column(length: 100)]
     private ?string $nombre = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    private ?string $total_actual_fondo = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    private ?string $total_invertido = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
-    private ?string $diferencia_total = null;
-
-    #[ORM\Column]
-    private ?\DateTime $fecha_apertura = null;
+    #[ORM\Column(type: 'date')]
+    private ?\DateTimeInterface $fechaApertura = null;
 
     #[ORM\ManyToOne(inversedBy: 'productosInversion')]
-    #[ORM\JoinColumn(name: 'cuenta_iban', referencedColumnName: 'iban', nullable: false)]
+    #[ORM\JoinColumn(nullable: false)]
     private ?CuentaBancaria $cuenta = null;
 
-    #[ORM\OneToMany(mappedBy: 'producto_inversion', targetEntity: FondoInversion::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'productoInversion', targetEntity: FondoInversion::class, orphanRemoval: true)]
     private Collection $fondos;
+
 
     public function __construct()
     {
         $this->fondos = new ArrayCollection();
     }
 
-    public function getNumContrato(): ?int
+    public function getId(): ?int
     {
-        return $this->num_contrato;
+        return $this->id;
     }
 
-    public function setNumContrato(int $num_contrato): static
+    public function getNumContrato(): ?string
     {
-        $this->num_contrato = $num_contrato;
+        return $this->numContrato;
+    }
+
+    public function setNumContrato(string $numContrato): static
+    {
+        $this->numContrato = $numContrato;
 
         return $this;
     }
@@ -68,50 +68,14 @@ class ProductoInversion
         return $this;
     }
 
-    public function getTotalActualFondo(): ?string
+    public function getFechaApertura(): ?\DateTimeImmutable
     {
-        return $this->total_actual_fondo;
+        return $this->fechaApertura;
     }
 
-    public function setTotalActualFondo(string $total_actual_fondo): static
+    public function setFechaApertura(\DateTimeImmutable $fechaApertura): static
     {
-        $this->total_actual_fondo = $total_actual_fondo;
-
-        return $this;
-    }
-
-    public function getTotalInvertido(): ?string
-    {
-        return $this->total_invertido;
-    }
-
-    public function setTotalInvertido(string $total_invertido): static
-    {
-        $this->total_invertido = $total_invertido;
-
-        return $this;
-    }
-
-    public function getDiferenciaTotal(): ?string
-    {
-        return $this->diferencia_total;
-    }
-
-    public function setDiferenciaTotal(string $diferencia_total): static
-    {
-        $this->diferencia_total = $diferencia_total;
-
-        return $this;
-    }
-
-    public function getFechaApertura(): ?\DateTime
-    {
-        return $this->fecha_apertura;
-    }
-
-    public function setFechaApertura(\DateTime $fecha_apertura): static
-    {
-        $this->fecha_apertura = $fecha_apertura;
+        $this->fechaApertura = $fechaApertura;
 
         return $this;
     }
@@ -152,5 +116,33 @@ class ProductoInversion
         }
 
         return $this;
+    }
+
+
+    /**
+     * Suma el valor actual de mercado del último estado de cada fondo.
+     */
+    public function getTotalActualFondo(): float
+    {
+        $total = 0.0;
+        foreach ($this->fondos as $fondo) {
+            $ultimoEstado = $fondo->getUltimoEstado();
+            if ($ultimoEstado !== null) {
+                $total += $ultimoEstado->getValorActual() ?? 0.0;
+            }
+        }
+
+        return $total;
+    }
+
+    public function getTotalInvertido(): float
+    {
+        $total = 0.0;
+        foreach ($this->fondos as $fondo) {
+            foreach ($fondo->getMovimientos() as $movimiento) {
+                $total += $movimiento->getImporteNetoAportado() ?? 0.0;
+            }
+        }
+        return $total;
     }
 }

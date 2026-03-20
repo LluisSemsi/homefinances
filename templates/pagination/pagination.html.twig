@@ -1,0 +1,23 @@
+{% if pageCount > 1 %}
+<div class="pagination">
+    {% if current > 1 %}
+        <a href="{{ path(route, query|merge({page: current - 1})) }}" class="pagination-btn">&#8592;</a>
+    {% else %}
+        <span class="pagination-btn disabled">&#8592;</span>
+    {% endif %}
+
+    {% for page in pagesInRange %}
+        {% if page == current %}
+            <span class="pagination-btn active">{{ page }}</span>
+        {% else %}
+            <a href="{{ path(route, query|merge({page: page})) }}" class="pagination-btn">{{ page }}</a>
+        {% endif %}
+    {% endfor %}
+
+    {% if current < pageCount %}
+        <a href="{{ path(route, query|merge({page: current + 1})) }}" class="pagination-btn">&#8594;</a>
+    {% else %}
+        <span class="pagination-btn disabled">&#8594;</span>
+    {% endif %}
+</div>
+{% endif %}

@@ -1,0 +1,43 @@
+{% extends 'base/base.html.twig' %}
+
+{% block title %}Tu panel{% endblock %}
+
+{% block body %}
+
+    {{ include('panel/templates/header.html.twig') }}
+
+    {{ include('panel/templates/sidebar.html.twig') }}
+
+    <main class="content">
+
+        <div id="bulk-mov-content">        
+            <h1 class="titulo-panel titulo">Añadir movimientos a cuenta</h1>
+            <p class="text-panel text">Importa los movimientos de tu cuenta bancaria subiendo el fichero Excel exportado desde tu banco. Asegúrate de que el fichero respeta el formato requerido antes de enviarlo. Una vez procesado, todos los movimientos quedarán registrados automáticamente en el sistema.</p>
+            <div class="datos-cuenta">
+                <div>
+                    <img src="{{ asset('images/icons/' ~ cuenta.getImage()) }}" alt="Logo Banco" class="logo-banco">
+                    <h2 class="subtitulo">{{ cuenta.getNombreBanco() }}</h2>
+                    <p class="text"> - </p>
+                    <p class="text">{{ cuenta.getAlias() }}</p>
+                    <p class="text"> - </p>
+                    <p class="text"><b>IBAN:</b> {{ cuenta.getIBAN() }}</p>                  
+                </div>  
+            </div>
+
+            {{ form_errors(BulkMovementsForm) }}
+
+            {{ form_start(BulkMovementsForm, { attr: { id: "form-bulk-bank-movements"}}) }} 
+
+                {{ form_row(BulkMovementsForm.fichero) }}
+
+                <button type="submit" class="btn btn-primary">Subir Fichero</button>
+            {{ form_end(BulkMovementsForm) }}
+        </div>
+
+        
+        
+    </main>
+
+   
+
+{% endblock %}

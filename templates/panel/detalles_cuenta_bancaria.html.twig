@@ -1,0 +1,292 @@
+{% extends 'base/base.html.twig' %}
+
+{% block title %}Tu panel{% endblock %}
+
+{% block body %}
+
+    {{ include('panel/templates/header.html.twig') }}
+
+    {{ include('panel/templates/sidebar.html.twig') }}
+
+    <main class="content">
+
+        <div id="detalles-cuenta-content">
+            <button class="btn-primary" id="acciones-detalles-cuenta" onclick="toggleDropdown()">Acciones <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23FFFFFF' d='M6 8L1 3h10z'/%3E%3C/svg%3E" alt=""></button>
+            <div class="dropdown" id="dropdownMenu">
+                <a href="{{ path('add-movimientos', { iban: cuenta.getIban() }) }}">Añadir Movimiento Único</a>
+                <a href="{{ path('categorizar-movimientos-bancarios', { iban: cuenta.getIban() }) }}">Categorizar movimientos</a>
+                <a href="{{ path('bulk-movimientos-bancarios', { iban: cuenta.getIban() }) }}">Añadir Movimientos Desde Fichero</a>
+                <a href="{{ path('editar-cuenta', { iban: cuenta.getIban() }) }}">Editar Cuenta</a>
+                <a href="{{ path('eliminar-cuenta', { iban: cuenta.getIban() }) }}">Eliminar Cuenta</a>
+            </div>
+            <h1 class="titulo-panel titulo">Detalles de la cuenta</h1>
+            <p class="text-panel text">En esta página se muestran los detalles de la cuenta bancaria, así como sus movimientos y las acciones que se pueden realizar sobre ellas.</p>
+            <div class="datos-cuenta">
+                <div>
+                    <img src="{{ asset('images/icons/' ~ cuenta.getImage()) }}" alt="Logo Banco" class="logo-banco">
+                    <h2 class="subtitulo">{{ cuenta.getNombreBanco() }}</h2>
+                    <p class="text"> - </p>
+                    <p class="text">{{ cuenta.getAlias() }}</p>
+                    <p class="text"> - </p>
+                    <p class="text"><b>IBAN:</b> {{ cuenta.getIBAN() }}</p>
+                    <p class="text"> - </p>
+                    <p class="text"><b>Saldo actual:</b></p>
+                    <span class="saldo">{{ cuenta.getSaldo() }}€</span>                   
+                </div>   
+            </div>
+            <div class="graficos-container">
+                <div>                    
+                    <div id="graficoIngresosGastos"></div>
+                </div>
+                <div>                    
+                    <div id="graficoGastosCategorias"></div>
+                </div>
+            </div>
+            <div class="leyendas-graficos">
+                <h4 class="leyenda-grafico">Ingresos vs Gastos (Últimos 6 meses)</h4>
+                <h4 class="leyenda-grafico">Gastos por categorías (Último mes)</h4>
+            </div>
+            <h3 class="titulo-subseccion">Movimientos</h3>
+
+            <div class="filtros-container">
+                <div class="filtros-predefinidos">
+                    <a href="{{ path('detalles-cuenta-bancaria', {iban: cuenta.getIban(), filtro: 'mes'}) }}" 
+                    class="btn-filtro {{ app.request.query.get('filtro') == 'mes' ? 'active' : '' }}">
+                        Último mes
+                    </a>
+                    <a href="{{ path('detalles-cuenta-bancaria', {iban: cuenta.getIban(), filtro: 'trimestre'}) }}"
+                    class="btn-filtro {{ app.request.query.get('filtro') == 'trimestre' ? 'active' : '' }}">
+                        Últimos 3 meses
+                    </a>
+                    <a href="{{ path('detalles-cuenta-bancaria', {iban: cuenta.getIban(), filtro: 'semestre'}) }}"
+                    class="btn-filtro {{ app.request.query.get('filtro') == 'semestre' ? 'active' : '' }}">
+                        Últimos 6 meses
+                    </a>
+                    <a href="{{ path('detalles-cuenta-bancaria', {iban: cuenta.getIban(), filtro: 'anio'}) }}"
+                    class="btn-filtro {{ app.request.query.get('filtro') == 'anio' ? 'active' : '' }}">
+                        Último año
+                    </a>
+                </div>
+
+                <form method="get" action="{{ path('detalles-cuenta-bancaria', {iban: cuenta.getIban()}) }}" class="filtros-fechas">
+                    <input type="date" name="desde" value="{{ app.request.query.get('desde') }}">
+                    <span>hasta</span>
+                    <input type="date" name="hasta" value="{{ app.request.query.get('hasta') }}">
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                </form>
+            </div>
+
+            <table>
+                <thead>
+                    <tr class="fila-headings-mov-categorizar">
+                        <th class="celda celda-fecha">Fecha</th>
+                        <th class="celda celda-concepto">Concepto</th>
+                        <th class="celda celda-cantidad">Cantidad</th>
+                        <th class="celda celda-tipo">Categoría</th>
+                        <th class="celda celda-acciones">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if num_movimientos == 0 %}
+                        <tr style="width: 100%;">
+                            <td colspan="4"><p class="text" style="padding: 25px 0">No tienes movimientos sin categorizar en esta cuenta. ¡Enhorabuena!</p></td>
+                        </tr>
+                    {% endif %}
+                    {% for movimiento in movimientos %}
+                        <tr class="fila-mov-categorizar">
+                            <td class="celda celda-fecha">{{ movimiento.getFecha()|date('d/m/Y') }}</td>
+                            <td class="celda celda-concepto">{{ movimiento.getConcepto() }}</td>
+                            <td class="{{ movimiento.getCantidad() < 0 ? 'negative-number' : 'positive-number' }} celda celda-cantidad">
+                                {{ movimiento.getCantidad() }}€
+                            </td>
+                            <td class="celda celda-tipo">{{  movimiento.getTipo().getNombre() }}</td>
+                            <td class="celda celda-acciones"><img src="{{ asset('images/icons/edit-icon.png') }}" alt="Icono editar" class="icon edit-icon" title="Editar Movimiento" onclick="abrirModal({{ movimiento.getId() }}, '{{ movimiento.getConcepto()|escape('js') }}', {{ movimiento.getTipo().getId() }})"></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {{ knp_pagination_render(movimientos) }}
+        </div>
+        
+    </main>
+
+    <div id="modal-editar" class="modal-overlay" style="display:none">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Editar movimiento</h3>
+                <button class="modal-close" onclick="cerrarModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Concepto</label>
+                    <input type="text" id="modal-concepto" class="modal-input">
+                </div>
+                <div class="form-group">
+                    <label>Categoría</label>
+                    <select id="modal-tipo">
+                        {% for tipo in tipos %}
+                            <option value="{{ tipo.getId() }}">{{ tipo.getNombre() }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="guardarMovimiento()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Axios JS -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <!-- Apexcharts (Gráficos) -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <script>
+
+        function toggleDropdown() {
+            const dropdown = document.getElementById("dropdownMenu");
+            dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+          }
+
+        const ingresosGastos = {{ ingresos_gastos|json_encode|raw }};
+        const gastosCategorias = {{ gastos_categorias|json_encode|raw }};
+
+        const meses = {
+            '01': 'Ene', '02': 'Feb', '03': 'Mar', '04': 'Abr',
+            '05': 'May', '06': 'Jun', '07': 'Jul', '08': 'Ago',
+            '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dic'
+        };
+
+        // Gráfico de barras - Ingresos vs Gastos
+        new ApexCharts(document.getElementById('graficoIngresosGastos'), {
+            chart: {
+                type: 'bar',
+                height: 280,
+                toolbar: { show: false },
+                fontFamily: 'inherit',
+            },
+            series: [
+                {
+                    name: 'Ingresos',
+                    data: ingresosGastos.map(d => parseFloat(d.ingresos))
+                },
+                {
+                    name: 'Gastos',
+                    data: ingresosGastos.map(d => parseFloat(d.gastos))
+                }
+            ],
+            xaxis: {
+                categories: ingresosGastos.map(d => meses[d.mes.split('-')[1]] + ' ' + d.mes.split('-')[0]),
+            },
+            colors: ['#2196f3', '#1769aa'],
+            plotOptions: {
+                bar: {
+                    borderRadius: 4,
+                    columnWidth: '55%',
+                }
+            },
+            dataLabels: { enabled: false },
+            legend: { position: 'top' },
+            yaxis: {
+                labels: {
+                    formatter: val => val.toFixed(2) + '€'
+                }
+            },
+            tooltip: {
+                y: {
+                    formatter: val => val.toFixed(2) + '€'
+                }
+            },
+            grid: {
+                borderColor: '#f0f0f0'
+            }
+        }).render();
+
+        // Gráfico de donut - Gastos por categoría
+        new ApexCharts(document.getElementById('graficoGastosCategorias'), {
+            chart: {
+                type: 'donut',
+                height: 280,
+                fontFamily: 'inherit',
+            },
+            series: gastosCategorias.map(d => parseFloat(d.total)),
+            labels: gastosCategorias.map(d => d.categoria),
+            colors: ['#2196f3', '#1769aa', '#64b5f6', '#0d47a1', '#42a5f5', '#1565c0', '#90caf9', '#0a3d7a'],
+            dataLabels: {
+                enabled: true,
+                formatter: (val) => val.toFixed(1) + '%'
+            },
+            legend: { position: 'bottom' },
+            tooltip: {
+                y: {
+                    formatter: val => val.toFixed(2) + '€'
+                }
+            },
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size: '65%',
+                        labels: {
+                            show: true,
+                            total: {
+                                show: true,
+                                label: 'Total',
+                                formatter: w => w.globals.seriesTotals
+                                    .reduce((a, b) => a + b, 0)
+                                    .toFixed(2) + '€'
+                            }
+                        }
+                    }
+                }
+            }
+        }).render();
+
+        
+        //MODAL EDITAR MOVIMIENTO
+
+        let movimientoIdActual = null;
+
+        function abrirModal(id, concepto, tipoId) {
+            movimientoIdActual = id;
+            document.getElementById('modal-concepto').value = concepto;
+            document.getElementById('modal-tipo').value = tipoId;
+            document.getElementById('modal-editar').style.display = 'flex';
+        }
+
+        function cerrarModal() {
+            movimientoIdActual = null;
+            document.getElementById('modal-editar').style.display = 'none';
+        }
+
+        function guardarMovimiento() {
+            const concepto = document.getElementById('modal-concepto').value;
+            const tipoId = document.getElementById('modal-tipo').value;
+
+            axios.post(`/panel/movimiento/editar/${movimientoIdActual}`, {
+                concepto: concepto,
+                tipo_id: parseInt(tipoId)
+            })
+            .then(response => {
+                cerrarModal();
+                mostrarNotificacion('Movimiento actualizado correctamente', 'success');
+                setTimeout(() => location.reload(), 1500);
+            })
+            .catch(error => {
+                mostrarNotificacion('Error al actualizar el movimiento', 'error');
+            });
+        }
+
+        function mostrarNotificacion(mensaje, tipo) {
+            const notif = document.createElement('div');
+            notif.className = `notificacion ${tipo}`;
+            notif.textContent = mensaje;
+            document.body.appendChild(notif);
+
+            setTimeout(() => notif.remove(), 3000);
+        }
+
+    </script>
+
+{% endblock %}

@@ -43,6 +43,10 @@ crear-cuentas-bancarias:
     path: /crear-cuentas-bancarias
     controller: App\Controller\PanelController::crear_cuentas_bancarias
 
+detalles-cuenta-bancaria:
+    path: /detalles-cuenta-bancaria/{iban}
+    controller: App\Controller\PanelController::detalles_cuenta_bancaria
+
 add-movimientos:
     path: /add-movimientos/{iban}
     controller: App\Controller\PanelController::add_movimientos
@@ -58,3 +62,25 @@ eliminar-cuenta:
 confirmar-eliminar-cuenta:
     path: /confirmar-eliminar-cuenta/{iban}
     controller: App\Controller\PanelController::confirmar_eliminar_cuenta
+
+bulk-movimientos-bancarios:
+    path: /bulk-movimientos-bancarios/{iban}
+    controller: App\Controller\PanelController::bulk_movimientos_bancarios
+
+categorizar-movimientos-bancarios:
+    path: /categorizar-movimientos-bancarios/{iban}
+    controller: App\Controller\PanelController::categorizar_movimientos_bancarios
+
+inversiones:
+    path: /inversiones
+    controller: App\Controller\PanelController::inversiones
+
+
+# -------------------------------- #
+#         Rutas JavaScript         #
+# -------------------------------- #
+
+editar-movimiento:
+    path: /panel/movimiento/editar/{id}
+    controller: App\Controller\PanelController::editarMovimiento
+    methods: [POST]

@@ -33,6 +33,7 @@ class CreateAccountFormType extends AbstractType
 
         $choises = [];
 
+        /** @var \App\Entity\User $usuario_actual */
         $usuario_actual = $this->security->getUser();
 
         foreach($users as $user){
@@ -49,6 +50,9 @@ class CreateAccountFormType extends AbstractType
                 'required' => true
             ])
             ->add('titular', TextType::class, [
+                'required' => true
+            ])
+            ->add('alias', TextType::class, [
                 'required' => true
             ])
             ->add('usuario_asociado', ChoiceType::class, [

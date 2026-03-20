@@ -1,0 +1,74 @@
+{% extends 'base/base.html.twig' %}
+
+{% block title %}Tu panel{% endblock %}
+
+{% block body %}
+
+    {{ include('panel/templates/header.html.twig') }}
+
+    {{ include('panel/templates/sidebar.html.twig') }}
+
+    <main class="content">        
+
+        <div id="categorizar-movimientos-container">
+            <h1 class="titulo">Clasifica tus movimientos en categorías</h1>
+            <p class="text">Clasificando los movimientos en categorías como "Restaurantes" o "Supermercado" se pueden 
+            tratar mejor los datos y ver estadísticas más ajustadas a la realidad financiera del hogar. ¡No cuesta nada! 
+            Pierde 5 minutos y categoriza tus movimientos bancarios</p>
+
+            <div class="alert-container">
+                <p class="text"><b>ATENCIÓN</b>: Al cambiar de página sin guardar los datos se pierden las modificaciones realizadas.</p>
+            </div>
+
+            <div class="datos-cuenta">
+                <div>
+                    <img src="{{ asset('images/icons/' ~ cuenta.getImage()) }}" alt="Logo Banco" class="logo-banco">
+                    <h2 class="subtitulo">{{ cuenta.getNombreBanco() }}</h2>
+                    <p class="text"> - </p>
+                    <p class="text">{{ cuenta.getAlias() }}</p>
+                    <p class="text"> - </p>
+                    <p class="text"><b>IBAN:</b> {{ cuenta.getIBAN() }}</p>                  
+                </div>   
+            </div>
+        
+            {{ form_start(form) }}
+                <table>
+                    <thead>
+                        <tr class="fila-headings-mov-categorizar">
+                            <th class="celda celda-fecha">Fecha</th>
+                            <th class="celda celda-concepto">Concepto</th>
+                            <th class="celda celda-cantidad">Cantidad</th>
+                            <th class="celda celda-tipo">Categoría</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if num_movimientos == 0 %}
+                            <tr style="width: 100%;">
+                                <td colspan="4"><p class="text" style="padding: 25px 0">No tienes movimientos sin categorizar en esta cuenta. ¡Enhorabuena!</p></td>
+                            </tr>
+                        {% endif %}
+                        {% for i, movimientoForm in form.movimientos %}
+                            <tr class="fila-mov-categorizar">
+                                <td class="celda celda-fecha">{{ movimientos[i].getFecha()|date('d/m/Y') }}</td>
+                                <td class="celda celda-concepto">{{ movimientos[i].getConcepto() }}</td>
+                                <td class="{{ movimientos[i].getCantidad() < 0 ? 'negative-number' : 'positive-number' }} celda celda-cantidad">
+                                    {{ movimientos[i].getCantidad() }}€
+                                </td>
+                                <td class="celda celda-tipo">{{ form_widget(movimientoForm.tipo) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {{ knp_pagination_render(movimientos) }}
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            {{ form_end(form) }}
+
+            
+            
+        </div>
+        
+    </main>
+
+   
+
+{% endblock %}

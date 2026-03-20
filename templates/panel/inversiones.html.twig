@@ -1,0 +1,128 @@
+{% extends 'base/base.html.twig' %}
+
+{% block title %}Tus Inversiones{% endblock %}
+
+{% block body %}
+
+    {{ include('panel/templates/header.html.twig') }}
+
+    {{ include('panel/templates/sidebar.html.twig') }}
+
+    <main class="content">
+
+        <h1 class="titulo-panel titulo">Inversiones</h1>
+        <p class="text-panel text" id="text-inversiones">Resumen de tu portfolio de inversión</p>
+
+        <div id="short-summary-container">
+            <div class="card summary-card">
+                <div>
+                    <img src="{{ asset('images/icons/bank-accounts.png') }}" alt="Icono número de cuentas" class="panel-icon">
+                </div>
+                <div>
+                    <h2>Capital Invertido</h2>
+                    <p class="summary-data">{{capital_invertido}}€</p>
+                </div>
+            </div>
+            <div class="card summary-card">
+                <div>
+                    <img src="{{ asset('images/icons/total-money.png') }}" alt="Icono saldo de cuentas" class="panel-icon">
+                </div>
+                <div>
+                    <h2>Valor Actual</h2>
+                    <p class="summary-data {{ valor_actual < 0 ? 'negative-number' : 'positive-number' }}">{{valor_actual}}€</p>
+                </div>
+            </div>
+            <div class="card summary-card">
+                <div>
+                    <img src="{{ asset('images/icons/grafica.png') }}" alt="Icono saldo de cuentas" class="panel-icon">
+                </div>
+                <div>
+                    <h2>Rentabilidad Total</h2>
+                    <p class="summary-data {{ rentabilidad_absoluta < 0 ? 'negative-number' : 'positive-number' }}">
+                        {{rentabilidad_absoluta}}€
+                        <small id="percent-summary-invest" class="{{ rentabilidad_percent < 0 ? 'negative-number' : 'positive-number' }}">{{ rentabilidad_percent|round(2, 'floor') }}%</small>
+                    </p>
+                    
+
+                </div>
+            </div>
+            <div class="card summary-card">
+                <div>
+                    <img src="{{ asset('images/icons/total-money.png') }}" alt="Icono saldo de cuentas" class="panel-icon">
+                </div>
+                <div>
+                    <h2>Aportado este año</h2>
+                    <p class="summary-data">{{aportado_anio}}€</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div id="grafico-inversiones-title-cont">
+                <h2>Evolución del portfolio</h2>
+                <p class="text">Capital invertido vs Valor actual</p>
+            </div>
+            <hr>
+            <div id="grafico-evolucion"></div>
+        </div>
+
+        
+
+        
+    </main>
+
+    <!-- Apexcharts (Gráficos) -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <script>
+
+        const datosGrafico = {{ datos_grafico|json_encode|raw }};
+
+        new ApexCharts(document.getElementById('grafico-evolucion'), {
+            chart: {
+                type: 'line',
+                height: 300,
+                toolbar: { show: false },
+                fontFamily: 'inherit'
+            },
+            series: [
+                {
+                    name: 'Valor actual',
+                    data: datosGrafico.map(d => parseFloat(d.valor_actual))
+                },
+                {
+                    name: 'Capital invertido',
+                    data: datosGrafico.map(d => parseFloat(d.capital_invertido))
+                }
+            ],
+            xaxis: {
+                categories: datosGrafico.map(d => {
+                    const fecha = new Date(d.fecha.date ?? d.fecha);
+                    return fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                }),
+                labels: { style: { fontSize: '11px' } }
+            },
+            colors: ['#2196f3', '#1769aa'],
+            stroke: {
+                curve: 'smooth',
+                width: [2, 2],
+                dashArray: [0, 4]
+            },
+            dataLabels: { enabled: false },
+            legend: { position: 'top' },
+            yaxis: {
+                labels: {
+                    formatter: val => val.toLocaleString('es-ES', { minimumFractionDigits: 2 }) + '€',
+                    style: { fontSize: '11px' }
+                }
+            },
+            tooltip: {
+                y: {
+                    formatter: val => val.toLocaleString('es-ES', { minimumFractionDigits: 2 }) + '€'
+                }
+            },
+            grid: { borderColor: '#f0f0f0', strokeDashArray: 4 }
+        }).render();    
+
+    </script>
+{% endblock %}

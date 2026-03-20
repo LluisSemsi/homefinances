@@ -33,8 +33,10 @@ class EditBankAccountFormType extends AbstractType
 
         $choises = [];
 
+        /** @var \App\Entity\User $usuario_actual */
         $usuario_actual = $this->security->getUser();
 
+        
         foreach($users as $user){
             if($user->getId() != $usuario_actual->getId()){
                 $choises[$user->getUsername()] = $user->getId();
@@ -46,6 +48,9 @@ class EditBankAccountFormType extends AbstractType
                 'required' => true
             ])
             ->add('titular', TextType::class, [
+                'required' => true
+            ])
+            ->add('alias', TextType::class, [
                 'required' => true
             ])
         ;
