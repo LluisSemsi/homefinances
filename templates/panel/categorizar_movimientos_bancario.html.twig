@@ -1,74 +1,137 @@
 {% extends 'base/base.html.twig' %}
 
-{% block title %}Tu panel{% endblock %}
+{% block title %}Categorizar movimientos — {{ cuenta.getNombreBanco() }}{% endblock %}
 
 {% block body %}
 
     {{ include('panel/templates/header.html.twig') }}
-
     {{ include('panel/templates/sidebar.html.twig') }}
 
-    <main class="content">        
+    <main class="content">
 
-        <div id="categorizar-movimientos-container">
-            <h1 class="titulo">Clasifica tus movimientos en categorías</h1>
-            <p class="text">Clasificando los movimientos en categorías como "Restaurantes" o "Supermercado" se pueden 
-            tratar mejor los datos y ver estadísticas más ajustadas a la realidad financiera del hogar. ¡No cuesta nada! 
-            Pierde 5 minutos y categoriza tus movimientos bancarios</p>
+        {# ============================================================ #}
+        {# BREADCRUMB                                                    #}
+        {# ============================================================ #}
+        <nav class="breadcrumb-nav">
+            <a href="{{ path('panel_home') }}" class="breadcrumb-link">Panel</a>
+            <span class="breadcrumb-sep">›</span>
+            <a href="{{ path('detalles-cuenta-bancaria', { iban: cuenta.getIban() }) }}" class="breadcrumb-link">
+                {{ cuenta.getNombreBanco() }}
+            </a>
+            <span class="breadcrumb-sep">›</span>
+            <span class="breadcrumb-current">Categorizar movimientos</span>
+        </nav>
 
-            <div class="alert-container">
-                <p class="text"><b>ATENCIÓN</b>: Al cambiar de página sin guardar los datos se pierden las modificaciones realizadas.</p>
-            </div>
-
-            <div class="datos-cuenta">
+        {# ============================================================ #}
+        {# CABECERA                                                      #}
+        {# ============================================================ #}
+        <div class="dc-header-card">
+            <div class="dc-header-left">
+                <img src="{{ asset('images/icons/' ~ cuenta.getImage()) }}" alt="Logo banco" class="dc-logo-banco">
                 <div>
-                    <img src="{{ asset('images/icons/' ~ cuenta.getImage()) }}" alt="Logo Banco" class="logo-banco">
-                    <h2 class="subtitulo">{{ cuenta.getNombreBanco() }}</h2>
-                    <p class="text"> - </p>
-                    <p class="text">{{ cuenta.getAlias() }}</p>
-                    <p class="text"> - </p>
-                    <p class="text"><b>IBAN:</b> {{ cuenta.getIBAN() }}</p>                  
-                </div>   
-            </div>
-        
-            {{ form_start(form) }}
-                <table>
-                    <thead>
-                        <tr class="fila-headings-mov-categorizar">
-                            <th class="celda celda-fecha">Fecha</th>
-                            <th class="celda celda-concepto">Concepto</th>
-                            <th class="celda celda-cantidad">Cantidad</th>
-                            <th class="celda celda-tipo">Categoría</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if num_movimientos == 0 %}
-                            <tr style="width: 100%;">
-                                <td colspan="4"><p class="text" style="padding: 25px 0">No tienes movimientos sin categorizar en esta cuenta. ¡Enhorabuena!</p></td>
-                            </tr>
+                    <span class="pi-label">Categorizar movimientos</span>
+                    <h1 class="pi-titulo">{{ cuenta.getNombreBanco() }}</h1>
+                    <div class="pi-meta">
+                        <span class="pi-meta-item">
+                            <span class="pi-meta-icon">🏷️</span>
+                            <strong>{{ cuenta.getAlias() }}</strong>
+                        </span>
+                        <span class="pi-meta-sep">·</span>
+                        <span class="pi-meta-item">
+                            <span class="pi-meta-icon">💳</span>
+                            <strong>{{ cuenta.getIBAN() }}</strong>
+                        </span>
+                        {% if num_movimientos > 0 %}
+                            <span class="pi-meta-sep">·</span>
+                            <span class="pi-meta-item">
+                                <span class="pi-meta-icon">📋</span>
+                                <strong>{{ num_movimientos }}</strong> movimiento{{ num_movimientos != 1 ? 's' : '' }} sin categorizar
+                            </span>
                         {% endif %}
-                        {% for i, movimientoForm in form.movimientos %}
-                            <tr class="fila-mov-categorizar">
-                                <td class="celda celda-fecha">{{ movimientos[i].getFecha()|date('d/m/Y') }}</td>
-                                <td class="celda celda-concepto">{{ movimientos[i].getConcepto() }}</td>
-                                <td class="{{ movimientos[i].getCantidad() < 0 ? 'negative-number' : 'positive-number' }} celda celda-cantidad">
-                                    {{ movimientos[i].getCantidad() }}€
-                                </td>
-                                <td class="celda celda-tipo">{{ form_widget(movimientoForm.tipo) }}</td>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ============================================================ #}
+        {# AVISO                                                         #}
+        {# ============================================================ #}
+        <div class="cat-aviso">
+            <span class="cat-aviso-icon">⚠️</span>
+            <p>Al cambiar de página sin guardar se perderán las modificaciones realizadas. Guarda los cambios antes de paginar.</p>
+        </div>
+
+        {# ============================================================ #}
+        {# FORMULARIO + TABLA                                            #}
+        {# ============================================================ #}
+        <div class="dc-movimientos-section">
+
+            <div class="dc-movimientos-header">
+                <h2 class="pi-seccion-titulo" style="margin-bottom:0">Movimientos sin categorizar</h2>
+                <span class="dc-num-movimientos">{{ num_movimientos }} resultado{{ num_movimientos != 1 ? 's' : '' }}</span>
+            </div>
+
+            {{ form_start(form) }}
+
+                <div class="dc-tabla-wrap">
+                    <table class="dc-tabla">
+                        <thead>
+                            <tr style="background: linear-gradient(135deg, #1769aa 0%, #2196f3 100%);">
+                                <th class="dc-th dc-th-fecha">Fecha</th>
+                                <th class="dc-th dc-th-concepto">Concepto</th>
+                                <th class="dc-th dc-th-cantidad">Cantidad</th>
+                                <th class="dc-th dc-th-categoria">Categoría</th>
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {{ knp_pagination_render(movimientos) }}
-                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                        </thead>
+                        <tbody>
+                            {% if num_movimientos == 0 %}
+                                <tr>
+                                    <td colspan="4" class="dc-empty-row">
+                                        <span class="cat-empty-icon">🎉</span>
+                                        <p>No tienes movimientos sin categorizar en esta cuenta. ¡Enhorabuena!</p>
+                                        <a href="{{ path('detalles-cuenta-bancaria', { iban: cuenta.getIban() }) }}" class="btn-ver-mas" style="margin-top:0.75rem; display:inline-block">
+                                            ← Volver a la cuenta
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endif %}
+
+                            {% for i, movimientoForm in form.movimientos %}
+                                <tr class="dc-fila cat-fila">
+                                    <td class="dc-td dc-td-fecha">
+                                        {{ movimientos[i].getFecha()|date('d/m/Y') }}
+                                    </td>
+                                    <td class="dc-td dc-td-concepto">
+                                        <span class="dc-concepto-text">{{ movimientos[i].getConcepto() }}</span>
+                                    </td>
+                                    <td class="dc-td dc-td-cantidad {{ movimientos[i].getCantidad() < 0 ? 'negative-number' : 'positive-number' }}">
+                                        {{ movimientos[i].getCantidad() >= 0 ? '+' : '' }}{{ movimientos[i].getCantidad()|number_format(2, ',', '.') }}€
+                                    </td>
+                                    <td class="dc-td cat-td-select">
+                                        {{ form_widget(movimientoForm.tipo, { attr: { class: 'cat-select' } }) }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {# Paginación + botón guardar #}
+                <div class="cat-form-footer">
+                    <div class="dc-paginacion">
+                        {{ knp_pagination_render(movimientos) }}
+                    </div>
+                    {% if num_movimientos > 0 %}
+                        <button type="submit" class="btn btn-primary cat-btn-guardar">
+                            Guardar cambios
+                        </button>
+                    {% endif %}
+                </div>
+
             {{ form_end(form) }}
 
-            
-            
         </div>
-        
-    </main>
 
-   
+    </main>
 
 {% endblock %}

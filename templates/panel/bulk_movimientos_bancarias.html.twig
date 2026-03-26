@@ -1,43 +1,192 @@
 {% extends 'base/base.html.twig' %}
 
-{% block title %}Tu panel{% endblock %}
+{% block title %}Importar movimientos — {{ cuenta.getNombreBanco() }}{% endblock %}
 
 {% block body %}
 
     {{ include('panel/templates/header.html.twig') }}
-
     {{ include('panel/templates/sidebar.html.twig') }}
 
     <main class="content">
 
-        <div id="bulk-mov-content">        
-            <h1 class="titulo-panel titulo">Añadir movimientos a cuenta</h1>
-            <p class="text-panel text">Importa los movimientos de tu cuenta bancaria subiendo el fichero Excel exportado desde tu banco. Asegúrate de que el fichero respeta el formato requerido antes de enviarlo. Una vez procesado, todos los movimientos quedarán registrados automáticamente en el sistema.</p>
-            <div class="datos-cuenta">
+        {# ============================================================ #}
+        {# BREADCRUMB                                                    #}
+        {# ============================================================ #}
+        <nav class="breadcrumb-nav">
+            <a href="{{ path('panel_home') }}" class="breadcrumb-link">Panel</a>
+            <span class="breadcrumb-sep">›</span>
+            <a href="{{ path('detalles-cuenta-bancaria', { iban: cuenta.getIban() }) }}" class="breadcrumb-link">
+                {{ cuenta.getNombreBanco() }}
+            </a>
+            <span class="breadcrumb-sep">›</span>
+            <span class="breadcrumb-current">Importar movimientos</span>
+        </nav>
+
+        {# ============================================================ #}
+        {# CABECERA                                                      #}
+        {# ============================================================ #}
+        <div class="dc-header-card">
+            <div class="dc-header-left">
+                <img src="{{ asset('images/icons/' ~ cuenta.getImage()) }}" alt="Logo banco" class="dc-logo-banco">
                 <div>
-                    <img src="{{ asset('images/icons/' ~ cuenta.getImage()) }}" alt="Logo Banco" class="logo-banco">
-                    <h2 class="subtitulo">{{ cuenta.getNombreBanco() }}</h2>
-                    <p class="text"> - </p>
-                    <p class="text">{{ cuenta.getAlias() }}</p>
-                    <p class="text"> - </p>
-                    <p class="text"><b>IBAN:</b> {{ cuenta.getIBAN() }}</p>                  
-                </div>  
+                    <span class="pi-label">Importar desde fichero</span>
+                    <h1 class="pi-titulo">{{ cuenta.getNombreBanco() }}</h1>
+                    <div class="pi-meta">
+                        <span class="pi-meta-item">
+                            <span class="pi-meta-icon">🏷️</span>
+                            <strong>{{ cuenta.getAlias() }}</strong>
+                        </span>
+                        <span class="pi-meta-sep">·</span>
+                        <span class="pi-meta-item">
+                            <span class="pi-meta-icon">💳</span>
+                            <strong>{{ cuenta.getIBAN() }}</strong>
+                        </span>
+                    </div>
+                </div>
             </div>
-
-            {{ form_errors(BulkMovementsForm) }}
-
-            {{ form_start(BulkMovementsForm, { attr: { id: "form-bulk-bank-movements"}}) }} 
-
-                {{ form_row(BulkMovementsForm.fichero) }}
-
-                <button type="submit" class="btn btn-primary">Subir Fichero</button>
-            {{ form_end(BulkMovementsForm) }}
         </div>
 
-        
-        
+        {# ============================================================ #}
+        {# CUERPO                                                        #}
+        {# ============================================================ #}
+        <div class="bulk-layout">
+
+            {# --- Formulario de subida --- #}
+            <div class="card bulk-form-card">
+
+                <h2 class="bulk-card-titulo">Sube tu fichero Excel</h2>
+                <p class="bulk-card-desc">
+                    Importa los movimientos de tu cuenta bancaria subiendo el fichero Excel exportado desde tu banco.
+                    Asegúrate de que el fichero respeta el formato requerido antes de enviarlo.
+                    Una vez procesado, todos los movimientos quedarán registrados automáticamente.
+                </p>
+
+                {{ form_errors(BulkMovementsForm) }}
+
+                {{ form_start(BulkMovementsForm, { attr: { id: 'form-bulk-bank-movements' } }) }}
+
+                    {# Zona de drop #}
+                    <div class="bulk-dropzone" id="bulk-dropzone" onclick="document.getElementById('bulk-file-input').click()">
+                        <div class="bulk-dropzone-icon">📂</div>
+                        <p class="bulk-dropzone-text">Arrastra aquí tu fichero o <span class="bulk-dropzone-link">haz clic para seleccionar</span></p>
+                        <p class="bulk-dropzone-hint">Formatos aceptados: .xlsx, .xls</p>
+                        <p class="bulk-dropzone-filename" id="bulk-filename" style="display:none"></p>
+                    </div>
+
+                    {# Campo de fichero oculto — Symfony lo renderiza, lo ocultamos visualmente #}
+                    <div style="display:none">
+                        {{ form_row(BulkMovementsForm.fichero, { attr: { id: 'bulk-file-input' } }) }}
+                    </div>
+
+                    <div class="bulk-form-footer">
+                        <a href="{{ path('detalles-cuenta-bancaria', { iban: cuenta.getIban() }) }}" class="bulk-btn-cancelar">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary bulk-btn-subir" id="bulk-btn-subir" disabled>
+                            Subir fichero
+                        </button>
+                    </div>
+
+                {{ form_end(BulkMovementsForm) }}
+
+            </div>
+
+            {# --- Instrucciones de formato --- #}
+            <div class="card bulk-instrucciones-card">
+                <h3 class="bulk-card-titulo">Formato requerido</h3>
+                <p class="bulk-card-desc">El fichero Excel debe tener las siguientes columnas en orden:</p>
+
+                <div class="bulk-columnas">
+                    <div class="bulk-columna-item">
+                        <span class="bulk-columna-num">1</span>
+                        <div>
+                            <span class="bulk-columna-nombre">Fecha</span>
+                            <span class="bulk-columna-ejemplo">Ej: 01/03/2024</span>
+                        </div>
+                    </div>
+                    <div class="bulk-columna-item">
+                        <span class="bulk-columna-num">2</span>
+                        <div>
+                            <span class="bulk-columna-nombre">Concepto</span>
+                            <span class="bulk-columna-ejemplo">Ej: Compra supermercado</span>
+                        </div>
+                    </div>
+                    <div class="bulk-columna-item">
+                        <span class="bulk-columna-num">3</span>
+                        <div>
+                            <span class="bulk-columna-nombre">Cantidad</span>
+                            <span class="bulk-columna-ejemplo">Ej: -45.50 o 1200.00</span>
+                        </div>
+                    </div>
+                    <div class="bulk-columna-item">
+                        <span class="bulk-columna-num">4</span>
+                        <div>
+                            <span class="bulk-columna-nombre">Saldo</span>
+                            <span class="bulk-columna-ejemplo">Ej: 3250.75</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bulk-aviso-formato">
+                    <span>⚠️</span>
+                    <p>Los movimientos duplicados (misma fecha, concepto y cantidad) serán ignorados automáticamente.</p>
+                </div>
+            </div>
+
+        </div>
+
     </main>
 
-   
+    <script>
+        const dropzone   = document.getElementById('bulk-dropzone');
+        const fileInput  = document.getElementById('bulk-file-input');
+        const btnSubir   = document.getElementById('bulk-btn-subir');
+        const filenameEl = document.getElementById('bulk-filename');
+
+        // Cuando Symfony renderiza el input con su propio id, lo reasignamos
+        const twigInput = document.querySelector('#bulk_movements_form_fichero, [name*="fichero"]');
+        if (twigInput && twigInput !== fileInput) {
+            twigInput.id = 'bulk-file-input';
+        }
+
+        function onFileSelected(file) {
+            if (!file) return;
+            filenameEl.textContent = '📄 ' + file.name;
+            filenameEl.style.display = 'block';
+            dropzone.classList.add('bulk-dropzone-ready');
+            btnSubir.disabled = false;
+        }
+
+        document.addEventListener('change', function(e) {
+            if (e.target && (e.target.id === 'bulk-file-input' || e.target.name && e.target.name.includes('fichero'))) {
+                onFileSelected(e.target.files[0]);
+            }
+        });
+
+        dropzone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            dropzone.classList.add('bulk-dropzone-hover');
+        });
+
+        dropzone.addEventListener('dragleave', function() {
+            dropzone.classList.remove('bulk-dropzone-hover');
+        });
+
+        dropzone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropzone.classList.remove('bulk-dropzone-hover');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                // Asignar al input real de Symfony
+                const realInput = document.querySelector('[name*="fichero"]');
+                if (realInput) {
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    realInput.files = dt.files;
+                }
+                onFileSelected(file);
+            }
+        });
+    </script>
 
 {% endblock %}

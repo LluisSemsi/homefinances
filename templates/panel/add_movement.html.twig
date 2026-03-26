@@ -1,35 +1,161 @@
 {% extends 'base/base.html.twig' %}
 
-{% block title %}Tu panel{% endblock %}
+{% block title %}Añadir movimiento — {{ nombre_banco }}{% endblock %}
 
 {% block body %}
 
     {{ include('panel/templates/header.html.twig') }}
-
     {{ include('panel/templates/sidebar.html.twig') }}
 
     <main class="content">
 
-       {{ form_errors(add_movement_form) }}
+        {# ============================================================ #}
+        {# BREADCRUMB                                                    #}
+        {# ============================================================ #}
+        <nav class="breadcrumb-nav">
+            <a href="{{ path('panel_home') }}" class="breadcrumb-link">Panel</a>
+            <span class="breadcrumb-sep">›</span>
+            <a href="{{ path('detalles-cuenta-bancaria', { iban: cuenta.getIban() }) }}" class="breadcrumb-link">
+                {{ nombre_banco }}
+            </a>
+            <span class="breadcrumb-sep">›</span>
+            <span class="breadcrumb-current">Añadir movimiento</span>
+        </nav>
 
-        {{ form_start(add_movement_form, { attr: {class: 'card', id: "form-create-bank-movement"}}) }}
-            <h1 class="titulo-panel"> Añadir nuevo movimiento bancario</h1>
-            <p class="text-panel">Se creará un nuevo movimiento en la cuenta: <b>{{ nombre_banco }}</b></p>
-            {{ form_row(add_movement_form.cantidad, { attr: {id: "cantidad"}}) }}
-            {{ form_row(add_movement_form.concepto) }}
-            {{ form_row(add_movement_form.fecha) }}
+        {# ============================================================ #}
+        {# CABECERA                                                      #}
+        {# ============================================================ #}
+        <div class="dc-header-card">
+            <div class="dc-header-left">
+                <img src="{{ asset('images/icons/' ~ cuenta.getImage()) }}" alt="Logo banco" class="dc-logo-banco">
+                <div>
+                    <span class="pi-label">Añadir movimiento</span>
+                    <h1 class="pi-titulo">{{ nombre_banco }}</h1>
+                    <div class="pi-meta">
+                        <span class="pi-meta-item">
+                            <span class="pi-meta-icon">🏷️</span>
+                            <strong>{{ cuenta.getAlias() }}</strong>
+                        </span>
+                        <span class="pi-meta-sep">·</span>
+                        <span class="pi-meta-item">
+                            <span class="pi-meta-icon">💳</span>
+                            <strong>{{ cuenta.getIBAN() }}</strong>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            <button type="submit" class="btn btn-primary">Añadir movimiento</button>
-        {{ form_end(add_movement_form) }}
-        
+        {# ============================================================ #}
+        {# FORMULARIO                                                    #}
+        {# ============================================================ #}
+        <div class="addmov-layout">
+
+            <div class="card addmov-form-card">
+
+                <h2 class="bulk-card-titulo">Datos del movimiento</h2>
+                <p class="bulk-card-desc">
+                    Rellena los campos para registrar un nuevo movimiento en esta cuenta. 
+                    Usa cantidades negativas para gastos y positivas para ingresos.
+                </p>
+
+                {{ form_errors(add_movement_form) }}
+
+                {{ form_start(add_movement_form, { attr: { id: 'form-create-bank-movement', class: 'addmov-form' } }) }}
+
+                    <div class="addmov-fields">
+
+                        <div class="addmov-field-group addmov-field-cantidad">
+                            <label class="addmov-label">
+                                Cantidad
+                                <span class="addmov-label-hint">Negativo = gasto · Positivo = ingreso</span>
+                            </label>
+                            {{ form_widget(add_movement_form.cantidad, { attr: { id: 'cantidad', class: 'addmov-input addmov-input-cantidad', placeholder: 'Ej: -45.50 o 1200.00' } }) }}
+                            {{ form_errors(add_movement_form.cantidad) }}
+                            <div class="addmov-tipo-indicator" id="addmov-tipo-indicator"></div>
+                        </div>
+
+                        <div class="addmov-field-group">
+                            <label class="addmov-label">Concepto</label>
+                            {{ form_widget(add_movement_form.concepto, { attr: { class: 'addmov-input', placeholder: 'Ej: Compra supermercado' } }) }}
+                            {{ form_errors(add_movement_form.concepto) }}
+                        </div>
+
+                        <div class="addmov-field-group">
+                            <label class="addmov-label">Fecha</label>
+                            {{ form_widget(add_movement_form.fecha, { attr: { class: 'addmov-input' } }) }}
+                            {{ form_errors(add_movement_form.fecha) }}
+                        </div>
+
+                    </div>
+
+                    <div class="addmov-form-footer">
+                        <a href="{{ path('detalles-cuenta-bancaria', { iban: cuenta.getIban() }) }}" class="bulk-btn-cancelar">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary bulk-btn-subir">
+                            Añadir movimiento
+                        </button>
+                    </div>
+
+                {{ form_end(add_movement_form) }}
+
+            </div>
+
+            {# --- Panel informativo lateral --- #}
+            <div class="card addmov-info-card">
+                <h3 class="bulk-card-titulo">Consejos</h3>
+
+                <div class="addmov-tip">
+                    <span class="addmov-tip-icon">💡</span>
+                    <div>
+                        <span class="addmov-tip-titulo">Cantidades</span>
+                        <p class="addmov-tip-texto">Introduce la cantidad con signo negativo para gastos (ej: <code>-45.50</code>) y positivo para ingresos (ej: <code>1200.00</code>).</p>
+                    </div>
+                </div>
+
+                <div class="addmov-tip">
+                    <span class="addmov-tip-icon">🏷️</span>
+                    <div>
+                        <span class="addmov-tip-titulo">Categorización</span>
+                        <p class="addmov-tip-texto">Los movimientos añadidos manualmente quedan sin categorizar. Puedes asignarles una categoría después desde la sección <em>Categorizar movimientos</em>.</p>
+                    </div>
+                </div>
+
+                <div class="addmov-tip">
+                    <span class="addmov-tip-icon">📅</span>
+                    <div>
+                        <span class="addmov-tip-titulo">Fecha</span>
+                        <p class="addmov-tip-texto">Usa la fecha real del movimiento para que las estadísticas mensuales sean precisas.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
     </main>
 
     <script>
-    
+        // Indicador visual de gasto / ingreso en tiempo real
+        const cantidadInput   = document.getElementById('cantidad') 
+                             || document.querySelector('[name*="cantidad"]');
+        const tipoIndicator   = document.getElementById('addmov-tipo-indicator');
 
-    
-
-
+        if (cantidadInput && tipoIndicator) {
+            cantidadInput.addEventListener('input', function() {
+                const val = parseFloat(this.value.replace(',', '.'));
+                if (isNaN(val) || this.value === '' || this.value === '-') {
+                    tipoIndicator.textContent = '';
+                    tipoIndicator.className = 'addmov-tipo-indicator';
+                } else if (val < 0) {
+                    tipoIndicator.textContent = '▼ Gasto';
+                    tipoIndicator.className = 'addmov-tipo-indicator addmov-tipo-gasto';
+                } else {
+                    tipoIndicator.textContent = '▲ Ingreso';
+                    tipoIndicator.className = 'addmov-tipo-indicator addmov-tipo-ingreso';
+                }
+            });
+        }
     </script>
 
 {% endblock %}

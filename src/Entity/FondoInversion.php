@@ -82,6 +82,11 @@ class FondoInversion
 
         return $this;
     }
+    
+    public function getMovimientos(): Collection
+    {
+        return $this->movimientos;
+    }
 
     /**
      * @return Collection<int, EstadoFondoInversion>

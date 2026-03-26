@@ -1,0 +1,189 @@
+{% extends 'base/base.html.twig' %}
+
+{% block title %}Añadir estado — {{ fondo.getNombre() }}{% endblock %}
+
+{% block body %}
+
+    {{ include('panel/templates/header.html.twig') }}
+    {{ include('panel/templates/sidebar.html.twig') }}
+
+    <main class="content">
+
+        {# ============================================================ #}
+        {# BREADCRUMB                                                    #}
+        {# ============================================================ #}
+        <nav class="breadcrumb-nav">
+            <a href="{{ path('inversiones') }}" class="breadcrumb-link">Inversiones</a>
+            <span class="breadcrumb-sep">›</span>
+            <a href="{{ path('producto-inversion', { id: fondo.getProductoInversion().getId() }) }}" class="breadcrumb-link">
+                {{ fondo.getProductoInversion().getNombre() }}
+            </a>
+            <span class="breadcrumb-sep">›</span>
+            <span class="breadcrumb-current">Añadir estado</span>
+        </nav>
+
+        {# ============================================================ #}
+        {# CABECERA                                                      #}
+        {# ============================================================ #}
+        <div class="pi-header-card" style="margin-bottom: 2rem;">
+            <div class="pi-header-left">
+                <span class="pi-label">Nuevo estado del fondo</span>
+                <h1 class="pi-titulo">{{ fondo.getNombre() }}</h1>
+                <div class="pi-meta">
+                    <span class="pi-meta-item">
+                        <span class="pi-meta-icon">🏷️</span>
+                        ISIN: <strong>{{ fondo.getIsin() }}</strong>
+                    </span>
+                    <span class="pi-meta-sep">·</span>
+                    <span class="pi-meta-item">
+                        <span class="pi-meta-icon">📋</span>
+                        {{ fondo.getProductoInversion().getNombre() }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        {# ============================================================ #}
+        {# FORMULARIO                                                    #}
+        {# ============================================================ #}
+        <div class="addestado-layout">
+            <div class="card addestado-form-card">
+
+                <h2 class="bulk-card-titulo">Datos del estado actual</h2>
+                <p class="bulk-card-desc">
+                    Registra la situación actual del fondo. Los campos de diferencia y rentabilidad
+                    se calcularán automáticamente a partir de los valores introducidos.
+                </p>
+
+                {{ form_errors(form) }}
+
+                {{ form_start(form, { attr: { id: 'form-añadir-estado', class: 'addestado-form' } }) }}
+
+                    <div class="addestado-fields">
+
+                        {# Fila 1: Fecha + Periodicidad + Duración #}
+                        <div class="addestado-row addestado-row-3">
+                            <div class="addestado-field-group">
+                                <label class="addestado-label">Fecha del estado</label>
+                                {{ form_widget(form.fecha, { attr: { class: 'addestado-input' } }) }}
+                                {{ form_errors(form.fecha) }}
+                            </div>
+                            <div class="addestado-field-group">
+                                <label class="addestado-label">Periodicidad</label>
+                                {{ form_widget(form.periodicidad, { attr: { class: 'addestado-input', placeholder: 'Ej: Mensual' } }) }}
+                                {{ form_errors(form.periodicidad) }}
+                            </div>
+                            <div class="addestado-field-group">
+                                <label class="addestado-label">Duración</label>
+                                {{ form_widget(form.duracion, { attr: { class: 'addestado-input', placeholder: 'Ej: Largo plazo' } }) }}
+                                {{ form_errors(form.duracion) }}
+                            </div>
+                        </div>
+
+                        {# Fila 2: Participaciones + Precio medio + Último precio #}
+                        <div class="addestado-row addestado-row-3">
+                            <div class="addestado-field-group">
+                                <label class="addestado-label">Nº participaciones</label>
+                                {{ form_widget(form.numParticipaciones, { attr: { class: 'addestado-input', placeholder: '0,0000' } }) }}
+                                {{ form_errors(form.numParticipaciones) }}
+                            </div>
+                            <div class="addestado-field-group">
+                                <label class="addestado-label">Precio medio (€)</label>
+                                {{ form_widget(form.precioMedio, { attr: { class: 'addestado-input', placeholder: '0,00' } }) }}
+                                {{ form_errors(form.precioMedio) }}
+                            </div>
+                            <div class="addestado-field-group">
+                                <label class="addestado-label">Último precio (€)</label>
+                                {{ form_widget(form.ultimoPrecio, { attr: { class: 'addestado-input', placeholder: '0,00', id: 'ultimo-precio' } }) }}
+                                {{ form_errors(form.ultimoPrecio) }}
+                            </div>
+                        </div>
+
+                        {# Fila 3: Importe invertido + Valor actual + Dividendos #}
+                        <div class="addestado-row addestado-row-3">
+                            <div class="addestado-field-group">
+                                <label class="addestado-label">Importe invertido (€)</label>
+                                {{ form_widget(form.importeInvertido, { attr: { class: 'addestado-input', placeholder: '0,00' } }) }}
+                                {{ form_errors(form.importeInvertido) }}
+                            </div>
+                            <div class="addestado-field-group">
+                                <label class="addestado-label">
+                                    Valor actual (€)
+                                    <span class="addestado-label-hint">Participaciones × último precio</span>
+                                </label>
+                                {{ form_widget(form.valorActual, { attr: { class: 'addestado-input', placeholder: '0,00', id: 'valor-actual' } }) }}
+                                {{ form_errors(form.valorActual) }}
+                            </div>
+                            <div class="addestado-field-group">
+                                <label class="addestado-label">Dividendos (€)</label>
+                                {{ form_widget(form.dividendos, { attr: { class: 'addestado-input', placeholder: '0,00' } }) }}
+                                {{ form_errors(form.dividendos) }}
+                            </div>
+                        </div>
+
+                        {# Fila 4: Diferencia + Diferencia total + % Total #}
+                        <div class="addestado-row addestado-row-3">
+                            <div class="addestado-field-group">
+                                <label class="addestado-label">Diferencia periodo (€)</label>
+                                {{ form_widget(form.diferencia, { attr: { class: 'addestado-input', placeholder: '0,00' } }) }}
+                                {{ form_errors(form.diferencia) }}
+                            </div>
+                            <div class="addestado-field-group">
+                                <label class="addestado-label">Diferencia total (€)</label>
+                                {{ form_widget(form.diferenciaTotal, { attr: { class: 'addestado-input', placeholder: '0,00', id: 'diferencia-total' } }) }}
+                                {{ form_errors(form.diferenciaTotal) }}
+                            </div>
+                            <div class="addestado-field-group">
+                                <label class="addestado-label">Rentabilidad total (%)</label>
+                                {{ form_widget(form.diferenciaTotalPercent, { attr: { class: 'addestado-input', placeholder: '0,0000', id: 'diferencia-total-pct' } }) }}
+                                {{ form_errors(form.diferenciaTotalPercent) }}
+                            </div>
+                        </div>
+
+                    </div>{# fin addestado-fields #}
+
+                    <div class="addestado-actions">
+                        <a href="{{ path('producto-inversion', { id: fondo.getProductoInversion().getId() }) }}" class="btn-cancelar-estado">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn-guardar-estado">
+                            Guardar estado
+                        </button>
+                    </div>
+
+                {{ form_end(form) }}
+
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        {# Auto-cálculo de valor actual y diferencia total al cambiar participaciones/último precio/importe invertido #}
+        const inputUltimoPrecio     = document.getElementById('ultimo-precio');
+        const inputValorActual      = document.getElementById('valor-actual');
+        const inputDiferenciaTotal  = document.getElementById('diferencia-total');
+        const inputDifPct           = document.getElementById('diferencia-total-pct');
+
+        function recalcular() {
+            const participaciones = parseFloat(document.querySelector('[id$="numParticipaciones"]')?.value?.replace(',', '.')) || 0;
+            const ultimoPrecio    = parseFloat(inputUltimoPrecio?.value?.replace(',', '.')) || 0;
+            const importeInvertido = parseFloat(document.querySelector('[id$="importeInvertido"]')?.value?.replace(',', '.')) || 0;
+
+            const valorActual = participaciones * ultimoPrecio;
+            const difTotal    = valorActual - importeInvertido;
+            const difPct      = importeInvertido > 0 ? (difTotal / importeInvertido) * 100 : 0;
+
+            if (valorActual > 0) {
+                inputValorActual.value     = valorActual.toFixed(2).replace('.', ',');
+                inputDiferenciaTotal.value = difTotal.toFixed(2).replace('.', ',');
+                inputDifPct.value          = difPct.toFixed(4).replace('.', ',');
+            }
+        }
+
+        document.querySelector('[id$="numParticipaciones"]')?.addEventListener('input', recalcular);
+        inputUltimoPrecio?.addEventListener('input', recalcular);
+        document.querySelector('[id$="importeInvertido"]')?.addEventListener('input', recalcular);
+    </script>
+
+{% endblock %}

@@ -1,42 +1,130 @@
 {% extends 'base/base.html.twig' %}
 
-{% block title %}Tu panel{% endblock %}
+{% block title %}Editar cuenta — {{ cuenta.getNombreBanco() }}{% endblock %}
 
 {% block body %}
 
     {{ include('panel/templates/header.html.twig') }}
-
     {{ include('panel/templates/sidebar.html.twig') }}
 
     <main class="content">
 
-        <div id="edit-account-container">        
-            <h1 class="titulo-panel titulo">Editar datos de una cuenta</h1>
-            <p class="text-panel text">En este apartado puedes modificar los datos de una cuenta bancaria.</p>
-            <div class="datos-cuenta">
+        {# ============================================================ #}
+        {# BREADCRUMB                                                    #}
+        {# ============================================================ #}
+        <nav class="breadcrumb-nav">
+            <a href="{{ path('panel_home') }}" class="breadcrumb-link">Panel</a>
+            <span class="breadcrumb-sep">›</span>
+            <a href="{{ path('detalles-cuenta-bancaria', { iban: cuenta.getIban() }) }}" class="breadcrumb-link">
+                {{ cuenta.getNombreBanco() }}
+            </a>
+            <span class="breadcrumb-sep">›</span>
+            <span class="breadcrumb-current">Editar cuenta</span>
+        </nav>
+
+        {# ============================================================ #}
+        {# CABECERA                                                      #}
+        {# ============================================================ #}
+        <div class="dc-header-card">
+            <div class="dc-header-left">
+                <img src="{{ asset('images/icons/' ~ cuenta.getImage()) }}" alt="Logo banco" class="dc-logo-banco">
                 <div>
-                    <img src="{{ asset('images/icons/' ~ cuenta.getImage()) }}" alt="Logo Banco" class="logo-banco">
-                    <h2 class="subtitulo">{{ cuenta.getNombreBanco() }}</h2>
-                    <p class="text"> - </p>
-                    <p class="text">{{ cuenta.getAlias() }}</p>
-                    <p class="text"> - </p>
-                    <p class="text"><b>IBAN:</b> {{ cuenta.getIBAN() }}</p>                  
-                </div>   
+                    <span class="pi-label">Editar cuenta bancaria</span>
+                    <h1 class="pi-titulo">{{ cuenta.getNombreBanco() }}</h1>
+                    <div class="pi-meta">
+                        <span class="pi-meta-item">
+                            <span class="pi-meta-icon">🏷️</span>
+                            <strong>{{ cuenta.getAlias() }}</strong>
+                        </span>
+                        <span class="pi-meta-sep">·</span>
+                        <span class="pi-meta-item">
+                            <span class="pi-meta-icon">💳</span>
+                            <strong>{{ cuenta.getIBAN() }}</strong>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ============================================================ #}
+        {# FORMULARIO                                                    #}
+        {# ============================================================ #}
+        <div class="addmov-layout">
+
+            <div class="card addmov-form-card">
+
+                <h2 class="bulk-card-titulo">Modificar datos</h2>
+                <p class="bulk-card-desc">El IBAN no puede modificarse. Solo puedes actualizar el nombre del banco, el titular y el alias.</p>
+
+                {{ form_errors(EditAccountForm) }}
+
+                {{ form_start(EditAccountForm, { attr: { id: 'form-edit-bank-account', class: 'addmov-form' } }) }}
+
+                    <div class="addmov-fields">
+
+                        <div class="addmov-field-group">
+                            <label class="addmov-label">Nombre del banco</label>
+                            {{ form_widget(EditAccountForm.nombre_banco, { attr: { class: 'addmov-input' } }) }}
+                            {{ form_errors(EditAccountForm.nombre_banco) }}
+                        </div>
+
+                        <div class="addmov-field-group">
+                            <label class="addmov-label">Titular</label>
+                            {{ form_widget(EditAccountForm.titular, { attr: { class: 'addmov-input' } }) }}
+                            {{ form_errors(EditAccountForm.titular) }}
+                        </div>
+
+                        <div class="addmov-field-group">
+                            <label class="addmov-label">
+                                Alias
+                                <span class="addmov-label-hint">Nombre corto para identificarla</span>
+                            </label>
+                            {{ form_widget(EditAccountForm.alias, { attr: { class: 'addmov-input' } }) }}
+                            {{ form_errors(EditAccountForm.alias) }}
+                        </div>
+
+                    </div>
+
+                    <div class="addmov-form-footer">
+                        <a href="{{ path('detalles-cuenta-bancaria', { iban: cuenta.getIban() }) }}" class="bulk-btn-cancelar">Cancelar</a>
+                        <button type="submit" class="btn btn-primary bulk-btn-subir">Guardar cambios</button>
+                    </div>
+
+                {{ form_end(EditAccountForm) }}
+
             </div>
 
-            {{ form_errors(EditAccountForm) }}
+            {# --- Info lateral --- #}
+            <div class="card addmov-info-card">
+                <h3 class="bulk-card-titulo">¿Qué puedes cambiar?</h3>
 
-            {{ form_start(EditAccountForm, { attr: {id: "form-create-bank-account"}}) }}
-                {{ form_row(EditAccountForm.nombre_banco) }}
-                {{ form_row(EditAccountForm.titular) }}
-                {{ form_row(EditAccountForm.alias) }}
+                <div class="addmov-tip">
+                    <span class="addmov-tip-icon">✏️</span>
+                    <div>
+                        <span class="addmov-tip-titulo">Nombre del banco</span>
+                        <p class="addmov-tip-texto">Actualiza el nombre si ha cambiado o si cometiste un error al crearlo.</p>
+                    </div>
+                </div>
 
-                <button type="submit" class="btn btn-primary">Editar cuenta</button>
-            {{ form_end(EditAccountForm) }}
+                <div class="addmov-tip">
+                    <span class="addmov-tip-icon">👤</span>
+                    <div>
+                        <span class="addmov-tip-titulo">Titular</span>
+                        <p class="addmov-tip-texto">El nombre del titular de la cuenta bancaria tal como aparece en tu banco.</p>
+                    </div>
+                </div>
+
+                <div class="addmov-tip">
+                    <span class="addmov-tip-icon">🏷️</span>
+                    <div>
+                        <span class="addmov-tip-titulo">Alias</span>
+                        <p class="addmov-tip-texto">El alias es el nombre con el que identificas la cuenta dentro de la aplicación. Ponle algo descriptivo como <em>"Cuenta nómina"</em> o <em>"Ahorro vacaciones"</em>.</p>
+                    </div>
+                </div>
+            </div>
+
         </div>
-        
-    </main>
 
-   
+    </main>
 
 {% endblock %}

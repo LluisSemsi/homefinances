@@ -1,115 +1,176 @@
 {% extends 'base/base.html.twig' %}
 
-{% block title %}Tu panel{% endblock %}
+{% block title %}Detalles — {{ cuenta.getNombreBanco() }}{% endblock %}
 
 {% block body %}
 
     {{ include('panel/templates/header.html.twig') }}
-
     {{ include('panel/templates/sidebar.html.twig') }}
 
     <main class="content">
 
-        <div id="detalles-cuenta-content">
-            <button class="btn-primary" id="acciones-detalles-cuenta" onclick="toggleDropdown()">Acciones <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23FFFFFF' d='M6 8L1 3h10z'/%3E%3C/svg%3E" alt=""></button>
-            <div class="dropdown" id="dropdownMenu">
-                <a href="{{ path('add-movimientos', { iban: cuenta.getIban() }) }}">Añadir Movimiento Único</a>
-                <a href="{{ path('categorizar-movimientos-bancarios', { iban: cuenta.getIban() }) }}">Categorizar movimientos</a>
-                <a href="{{ path('bulk-movimientos-bancarios', { iban: cuenta.getIban() }) }}">Añadir Movimientos Desde Fichero</a>
-                <a href="{{ path('editar-cuenta', { iban: cuenta.getIban() }) }}">Editar Cuenta</a>
-                <a href="{{ path('eliminar-cuenta', { iban: cuenta.getIban() }) }}">Eliminar Cuenta</a>
-            </div>
-            <h1 class="titulo-panel titulo">Detalles de la cuenta</h1>
-            <p class="text-panel text">En esta página se muestran los detalles de la cuenta bancaria, así como sus movimientos y las acciones que se pueden realizar sobre ellas.</p>
-            <div class="datos-cuenta">
+        {# ============================================================ #}
+        {# BREADCRUMB                                                    #}
+        {# ============================================================ #}
+        <nav class="breadcrumb-nav">
+            <a href="{{ path('panel_home') }}" class="breadcrumb-link">Panel</a>
+            <span class="breadcrumb-sep">›</span>
+            <span class="breadcrumb-current">{{ cuenta.getNombreBanco() }} — {{ cuenta.getAlias() }}</span>
+        </nav>
+
+        {# ============================================================ #}
+        {# CABECERA DE LA CUENTA                                         #}
+        {# ============================================================ #}
+        <div class="dc-header-card">
+            <div class="dc-header-left">
+                <img src="{{ asset('images/icons/' ~ cuenta.getImage()) }}" alt="Logo banco" class="dc-logo-banco">
                 <div>
-                    <img src="{{ asset('images/icons/' ~ cuenta.getImage()) }}" alt="Logo Banco" class="logo-banco">
-                    <h2 class="subtitulo">{{ cuenta.getNombreBanco() }}</h2>
-                    <p class="text"> - </p>
-                    <p class="text">{{ cuenta.getAlias() }}</p>
-                    <p class="text"> - </p>
-                    <p class="text"><b>IBAN:</b> {{ cuenta.getIBAN() }}</p>
-                    <p class="text"> - </p>
-                    <p class="text"><b>Saldo actual:</b></p>
-                    <span class="saldo">{{ cuenta.getSaldo() }}€</span>                   
-                </div>   
-            </div>
-            <div class="graficos-container">
-                <div>                    
-                    <div id="graficoIngresosGastos"></div>
-                </div>
-                <div>                    
-                    <div id="graficoGastosCategorias"></div>
+                    <span class="dc-label">Cuenta bancaria</span>
+                    <h1 class="dc-titulo">{{ cuenta.getNombreBanco() }}</h1>
+                    <div class="dc-meta">
+                        <span class="dc-meta-item">{{ cuenta.getAlias() }}</span>
+                        <span class="dc-meta-sep">·</span>
+                        <span class="dc-meta-item dc-iban">{{ cuenta.getIBAN() }}</span>
+                        <span class="dc-meta-sep">·</span>
+                        <span class="dc-meta-item">Titular: <strong>{{ cuenta.getTitular() }}</strong></span>
+                    </div>
                 </div>
             </div>
-            <div class="leyendas-graficos">
-                <h4 class="leyenda-grafico">Ingresos vs Gastos (Últimos 6 meses)</h4>
-                <h4 class="leyenda-grafico">Gastos por categorías (Último mes)</h4>
-            </div>
-            <h3 class="titulo-subseccion">Movimientos</h3>
-
-            <div class="filtros-container">
-                <div class="filtros-predefinidos">
-                    <a href="{{ path('detalles-cuenta-bancaria', {iban: cuenta.getIban(), filtro: 'mes'}) }}" 
-                    class="btn-filtro {{ app.request.query.get('filtro') == 'mes' ? 'active' : '' }}">
-                        Último mes
-                    </a>
-                    <a href="{{ path('detalles-cuenta-bancaria', {iban: cuenta.getIban(), filtro: 'trimestre'}) }}"
-                    class="btn-filtro {{ app.request.query.get('filtro') == 'trimestre' ? 'active' : '' }}">
-                        Últimos 3 meses
-                    </a>
-                    <a href="{{ path('detalles-cuenta-bancaria', {iban: cuenta.getIban(), filtro: 'semestre'}) }}"
-                    class="btn-filtro {{ app.request.query.get('filtro') == 'semestre' ? 'active' : '' }}">
-                        Últimos 6 meses
-                    </a>
-                    <a href="{{ path('detalles-cuenta-bancaria', {iban: cuenta.getIban(), filtro: 'anio'}) }}"
-                    class="btn-filtro {{ app.request.query.get('filtro') == 'anio' ? 'active' : '' }}">
-                        Último año
-                    </a>
+            <div class="dc-header-right">
+                <div class="dc-saldo-wrap">
+                    <span class="dc-saldo-label">Saldo actual</span>
+                    <span class="dc-saldo {{ cuenta.getSaldo() < 0 ? 'negative-number' : '' }}">
+                        {{ cuenta.getSaldo()|number_format(2, ',', '.') }}€
+                    </span>
                 </div>
-
-                <form method="get" action="{{ path('detalles-cuenta-bancaria', {iban: cuenta.getIban()}) }}" class="filtros-fechas">
-                    <input type="date" name="desde" value="{{ app.request.query.get('desde') }}">
-                    <span>hasta</span>
-                    <input type="date" name="hasta" value="{{ app.request.query.get('hasta') }}">
-                    <button type="submit" class="btn btn-primary">Filtrar</button>
-                </form>
+                <div class="dc-acciones-wrap">
+                    <button class="dc-btn-acciones" onclick="toggleAcciones()">
+                        Acciones
+                        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 12 12"><path fill="#fff" d="M6 8L1 3h10z"/></svg>
+                    </button>
+                    <div class="dc-dropdown" id="dcDropdown">
+                        <a href="{{ path('add-movimientos', { iban: cuenta.getIban() }) }}">➕ Añadir movimiento</a>
+                        <a href="{{ path('categorizar-movimientos-bancarios', { iban: cuenta.getIban() }) }}">🏷️ Categorizar movimientos</a>
+                        <a href="{{ path('bulk-movimientos-bancarios', { iban: cuenta.getIban() }) }}">📂 Importar desde fichero</a>
+                        <a href="{{ path('editar-cuenta', { iban: cuenta.getIban() }) }}">✏️ Editar cuenta</a>
+                        <div class="dc-dropdown-sep"></div>
+                        <a href="{{ path('eliminar-cuenta', { iban: cuenta.getIban() }) }}" class="dc-dropdown-danger">🗑️ Eliminar cuenta</a>
+                    </div>
+                </div>
             </div>
-
-            <table>
-                <thead>
-                    <tr class="fila-headings-mov-categorizar">
-                        <th class="celda celda-fecha">Fecha</th>
-                        <th class="celda celda-concepto">Concepto</th>
-                        <th class="celda celda-cantidad">Cantidad</th>
-                        <th class="celda celda-tipo">Categoría</th>
-                        <th class="celda celda-acciones">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if num_movimientos == 0 %}
-                        <tr style="width: 100%;">
-                            <td colspan="4"><p class="text" style="padding: 25px 0">No tienes movimientos sin categorizar en esta cuenta. ¡Enhorabuena!</p></td>
-                        </tr>
-                    {% endif %}
-                    {% for movimiento in movimientos %}
-                        <tr class="fila-mov-categorizar">
-                            <td class="celda celda-fecha">{{ movimiento.getFecha()|date('d/m/Y') }}</td>
-                            <td class="celda celda-concepto">{{ movimiento.getConcepto() }}</td>
-                            <td class="{{ movimiento.getCantidad() < 0 ? 'negative-number' : 'positive-number' }} celda celda-cantidad">
-                                {{ movimiento.getCantidad() }}€
-                            </td>
-                            <td class="celda celda-tipo">{{  movimiento.getTipo().getNombre() }}</td>
-                            <td class="celda celda-acciones"><img src="{{ asset('images/icons/edit-icon.png') }}" alt="Icono editar" class="icon edit-icon" title="Editar Movimiento" onclick="abrirModal({{ movimiento.getId() }}, '{{ movimiento.getConcepto()|escape('js') }}', {{ movimiento.getTipo().getId() }})"></td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {{ knp_pagination_render(movimientos) }}
         </div>
-        
+
+        {# ============================================================ #}
+        {# GRÁFICOS                                                      #}
+        {# ============================================================ #}
+        <div class="dc-graficos-grid">
+            <div class="card dc-grafico-card">
+                <h3 class="dc-grafico-titulo">
+                    Ingresos vs Gastos
+                    <span class="dc-grafico-subtitulo">últimos 6 meses</span>
+                </h3>
+                <div id="graficoIngresosGastos"></div>
+            </div>
+            <div class="card dc-grafico-card">
+                <h3 class="dc-grafico-titulo">
+                    Gastos por categoría
+                    <span class="dc-grafico-subtitulo">último mes</span>
+                </h3>
+                <div id="graficoGastosCategorias"></div>
+            </div>
+        </div>
+
+        {# ============================================================ #}
+        {# SECCIÓN MOVIMIENTOS                                           #}
+        {# ============================================================ #}
+        <div class="dc-movimientos-section">
+
+            <div class="dc-movimientos-header">
+                <h2 class="dc-movimientos-titulo">Movimientos</h2>
+                <div class="filtros-container">
+                    <div class="filtros-predefinidos">
+                        <a href="{{ path('detalles-cuenta-bancaria', {iban: cuenta.getIban(), filtro: 'mes'}) }}"
+                           class="btn-filtro {{ app.request.query.get('filtro') == 'mes' ? 'active' : '' }}">
+                            Último mes
+                        </a>
+                        <a href="{{ path('detalles-cuenta-bancaria', {iban: cuenta.getIban(), filtro: 'trimestre'}) }}"
+                           class="btn-filtro {{ app.request.query.get('filtro') == 'trimestre' ? 'active' : '' }}">
+                            3 meses
+                        </a>
+                        <a href="{{ path('detalles-cuenta-bancaria', {iban: cuenta.getIban(), filtro: 'semestre'}) }}"
+                           class="btn-filtro {{ app.request.query.get('filtro') == 'semestre' ? 'active' : '' }}">
+                            6 meses
+                        </a>
+                        <a href="{{ path('detalles-cuenta-bancaria', {iban: cuenta.getIban(), filtro: 'anio'}) }}"
+                           class="btn-filtro {{ app.request.query.get('filtro') == 'anio' ? 'active' : '' }}">
+                            Último año
+                        </a>
+                    </div>
+                    <form method="get" action="{{ path('detalles-cuenta-bancaria', {iban: cuenta.getIban()}) }}" class="filtros-fechas">
+                        <input type="date" name="desde" value="{{ app.request.query.get('desde') }}">
+                        <span class="filtros-hasta-label">hasta</span>
+                        <input type="date" name="hasta" value="{{ app.request.query.get('hasta') }}">
+                        <button type="submit" class="btn btn-primary">Filtrar</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="dc-table-wrap card">
+                <table class="dc-tabla">
+                    <thead>
+                        <tr class="dc-tabla-head">
+                            <th class="dc-th dc-th-fecha">Fecha</th>
+                            <th class="dc-th dc-th-concepto">Concepto</th>
+                            <th class="dc-th dc-th-categoria">Categoría</th>
+                            <th class="dc-th dc-th-cantidad">Cantidad</th>
+                            <th class="dc-th dc-th-acciones"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if num_movimientos == 0 %}
+                            <tr>
+                                <td colspan="5" class="dc-tabla-empty">
+                                    No hay movimientos para el período seleccionado.
+                                </td>
+                            </tr>
+                        {% endif %}
+                        {% for movimiento in movimientos %}
+                            <tr class="dc-tabla-fila">
+                                <td class="dc-td dc-td-fecha">
+                                    {{ movimiento.getFecha()|date('d/m/Y') }}
+                                </td>
+                                <td class="dc-td dc-td-concepto">
+                                    {{ movimiento.getConcepto() }}
+                                </td>
+                                <td class="dc-td dc-td-categoria">
+                                    <span class="dc-categoria-chip">{{ movimiento.getTipo().getNombre() }}</span>
+                                </td>
+                                <td class="dc-td dc-td-cantidad {{ movimiento.getCantidad() < 0 ? 'negative-number' : 'positive-number' }}">
+                                    {{ movimiento.getCantidad() >= 0 ? '+' : '' }}{{ movimiento.getCantidad()|number_format(2, ',', '.') }}€
+                                </td>
+                                <td class="dc-td dc-td-acciones">
+                                    <button class="dc-btn-editar"
+                                            title="Editar movimiento"
+                                            onclick="abrirModal({{ movimiento.getId() }}, '{{ movimiento.getConcepto()|escape('js') }}', {{ movimiento.getTipo().getId() }})">
+                                        <img src="{{ asset('images/icons/edit-icon.png') }}" alt="Editar" class="dc-edit-icon">
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="dc-tabla-footer">
+                    {{ knp_pagination_render(movimientos) }}
+                </div>
+            </div>
+
+        </div>
+
     </main>
 
+    {# ============================================================ #}
+    {# MODAL EDITAR MOVIMIENTO                                       #}
+    {# ============================================================ #}
     <div id="modal-editar" class="modal-overlay" style="display:none">
         <div class="modal-container">
             <div class="modal-header">
@@ -132,25 +193,31 @@
             </div>
             <div class="modal-footer">
                 <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
-                <button class="btn btn-primary" onclick="guardarMovimiento()">Guardar</button>
+                <button class="btn btn-primary dc-modal-save" onclick="guardarMovimiento()">Guardar</button>
             </div>
         </div>
     </div>
 
-    <!-- Axios JS -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
-    <!-- Apexcharts (Gráficos) -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
     <script>
 
-        function toggleDropdown() {
-            const dropdown = document.getElementById("dropdownMenu");
-            dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
-          }
+        /* ---- Dropdown acciones ---- */
+        function toggleAcciones() {
+            const dd = document.getElementById('dcDropdown');
+            dd.style.display = dd.style.display === 'flex' ? 'none' : 'flex';
+        }
 
-        const ingresosGastos = {{ ingresos_gastos|json_encode|raw }};
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.dc-acciones-wrap')) {
+                const dd = document.getElementById('dcDropdown');
+                if (dd) dd.style.display = 'none';
+            }
+        });
+
+        /* ---- Gráficos ---- */
+        const ingresosGastos   = {{ ingresos_gastos|json_encode|raw }};
         const gastosCategorias = {{ gastos_categorias|json_encode|raw }};
 
         const meses = {
@@ -159,71 +226,32 @@
             '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dic'
         };
 
-        // Gráfico de barras - Ingresos vs Gastos
         new ApexCharts(document.getElementById('graficoIngresosGastos'), {
-            chart: {
-                type: 'bar',
-                height: 280,
-                toolbar: { show: false },
-                fontFamily: 'inherit',
-            },
+            chart: { type: 'bar', height: 260, toolbar: { show: false }, fontFamily: 'inherit' },
             series: [
-                {
-                    name: 'Ingresos',
-                    data: ingresosGastos.map(d => parseFloat(d.ingresos))
-                },
-                {
-                    name: 'Gastos',
-                    data: ingresosGastos.map(d => parseFloat(d.gastos))
-                }
+                { name: 'Ingresos', data: ingresosGastos.map(d => parseFloat(d.ingresos)) },
+                { name: 'Gastos',   data: ingresosGastos.map(d => parseFloat(d.gastos)) }
             ],
             xaxis: {
-                categories: ingresosGastos.map(d => meses[d.mes.split('-')[1]] + ' ' + d.mes.split('-')[0]),
+                categories: ingresosGastos.map(d => meses[d.mes.split('-')[1]] + ' ' + d.mes.split('-')[0])
             },
             colors: ['#2196f3', '#1769aa'],
-            plotOptions: {
-                bar: {
-                    borderRadius: 4,
-                    columnWidth: '55%',
-                }
-            },
+            plotOptions: { bar: { borderRadius: 4, columnWidth: '55%' } },
             dataLabels: { enabled: false },
             legend: { position: 'top' },
-            yaxis: {
-                labels: {
-                    formatter: val => val.toFixed(2) + '€'
-                }
-            },
-            tooltip: {
-                y: {
-                    formatter: val => val.toFixed(2) + '€'
-                }
-            },
-            grid: {
-                borderColor: '#f0f0f0'
-            }
+            yaxis: { labels: { formatter: val => val.toFixed(2) + '€' } },
+            tooltip: { y: { formatter: val => val.toFixed(2) + '€' } },
+            grid: { borderColor: '#f0f0f0' }
         }).render();
 
-        // Gráfico de donut - Gastos por categoría
         new ApexCharts(document.getElementById('graficoGastosCategorias'), {
-            chart: {
-                type: 'donut',
-                height: 280,
-                fontFamily: 'inherit',
-            },
+            chart: { type: 'donut', height: 260, fontFamily: 'inherit' },
             series: gastosCategorias.map(d => parseFloat(d.total)),
-            labels: gastosCategorias.map(d => d.categoria),
+            labels:  gastosCategorias.map(d => d.categoria),
             colors: ['#2196f3', '#1769aa', '#64b5f6', '#0d47a1', '#42a5f5', '#1565c0', '#90caf9', '#0a3d7a'],
-            dataLabels: {
-                enabled: true,
-                formatter: (val) => val.toFixed(1) + '%'
-            },
+            dataLabels: { enabled: true, formatter: val => val.toFixed(1) + '%' },
             legend: { position: 'bottom' },
-            tooltip: {
-                y: {
-                    formatter: val => val.toFixed(2) + '€'
-                }
-            },
+            tooltip: { y: { formatter: val => val.toFixed(2) + '€' } },
             plotOptions: {
                 pie: {
                     donut: {
@@ -233,9 +261,7 @@
                             total: {
                                 show: true,
                                 label: 'Total',
-                                formatter: w => w.globals.seriesTotals
-                                    .reduce((a, b) => a + b, 0)
-                                    .toFixed(2) + '€'
+                                formatter: w => w.globals.seriesTotals.reduce((a, b) => a + b, 0).toFixed(2) + '€'
                             }
                         }
                     }
@@ -243,9 +269,7 @@
             }
         }).render();
 
-        
-        //MODAL EDITAR MOVIMIENTO
-
+        /* ---- Modal ---- */
         let movimientoIdActual = null;
 
         function abrirModal(id, concepto, tipoId) {
@@ -262,18 +286,18 @@
 
         function guardarMovimiento() {
             const concepto = document.getElementById('modal-concepto').value;
-            const tipoId = document.getElementById('modal-tipo').value;
+            const tipoId   = document.getElementById('modal-tipo').value;
 
             axios.post(`/panel/movimiento/editar/${movimientoIdActual}`, {
                 concepto: concepto,
                 tipo_id: parseInt(tipoId)
             })
-            .then(response => {
+            .then(() => {
                 cerrarModal();
                 mostrarNotificacion('Movimiento actualizado correctamente', 'success');
                 setTimeout(() => location.reload(), 1500);
             })
-            .catch(error => {
+            .catch(() => {
                 mostrarNotificacion('Error al actualizar el movimiento', 'error');
             });
         }
@@ -283,7 +307,6 @@
             notif.className = `notificacion ${tipo}`;
             notif.textContent = mensaje;
             document.body.appendChild(notif);
-
             setTimeout(() => notif.remove(), 3000);
         }
 

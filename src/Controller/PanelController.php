@@ -27,6 +27,9 @@ use App\Repository\TipoMovimientoBancarioRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Repository\ProductoInversionRepository;
 use App\Repository\MovimientoInversionRepository;
+use App\Repository\FondoInversionRepository;
+use App\Entity\EstadoFondoInversion;
+use App\Form\AnadirEstadoFondoType;
 
 class PanelController extends AbstractController
 {
@@ -58,7 +61,7 @@ class PanelController extends AbstractController
 
         return $this->render('panel/index.html.twig', [
             'user' => $user,
-            'title' => 'Tu Panel',
+            'title' => 'Tu panel ' . $user->getUsername(),
             'saldo_total_cuentas' => $saldo_total_cuentas,
             'num_cuentas_usuario' => $num_cuentas_usuario,
             'ingresos_mes' => $ingresos_mensual,
@@ -232,6 +235,7 @@ class PanelController extends AbstractController
         return $this->render('panel/add_movement.html.twig', [
             'title' => 'Nuevo movimiento',
             'user' => $user,
+            'cuenta' => $cuentaBancaria,
             'add_movement_form' => $form,
             'nombre_banco' => $cuentaBancaria->getNombreBanco()
         ]);   
@@ -509,6 +513,68 @@ class PanelController extends AbstractController
             'ultimas_aportaciones' => $ultimasAportaciones,
             'datos_grafico' => $datosGrafico,
         ]); 
+    }
+
+
+    public function productoInversion(int $id, Request $request, ProductoInversionRepository $productoInversionRepository): Response 
+    {
+        if (!$this->getUser()) {
+            return $this->redirectToRoute('home');
+        }
+
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+
+        $producto = $productoInversionRepository->find($id);
+
+        if (!$producto) {
+            return $this->redirectToRoute('error', ['code' => 'UNKNOWN_ERROR']);
+        }
+
+        return $this->render('panel/producto_inversion.html.twig', [
+            'user' => $user,
+            'producto' => $producto,
+            'title' => $producto->getNombre(),
+        ]);
+    }
+
+    public function anadirEstadoFondo(int $id, Request $request, FondoInversionRepository $fondoInversionRepository,
+        EntityManagerInterface $em
+    ): Response {
+ 
+        if (!$this->getUser()) {
+            return $this->redirectToRoute('home');
+        }
+ 
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+ 
+        $fondo = $fondoInversionRepository->find($id);
+ 
+        // Seguridad: el fondo debe existir y pertenecer al usuario
+        if (!$fondo || !$fondo->getProductoInversion()->getCuentaBancaria()->getUsuarios()->contains($user)) {
+            return $this->redirectToRoute('inversiones');
+        }
+ 
+        $estado = new EstadoFondoInversion();
+        $form   = $this->createForm(AnadirEstadoFondoType::class, $estado);
+        $form->handleRequest($request);
+ 
+        if ($form->isSubmitted() && $form->isValid()) {
+            $estado->setFondoInversion($fondo);
+            $em->persist($estado);
+            $em->flush();
+ 
+            return $this->redirectToRoute('producto-inversion', [
+                'id' => $fondo->getProductoInversion()->getId(),
+            ]);
+        }
+ 
+        return $this->render('panel/anadir_estado_fondo.html.twig', [
+            'form'  => $form,
+            'fondo' => $fondo,
+            'user'  => $user,
+        ]);
     }
 
 }

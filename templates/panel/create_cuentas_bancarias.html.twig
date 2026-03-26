@@ -1,71 +1,172 @@
 {% extends 'base/base.html.twig' %}
 
-{% block title %}Tu panel{% endblock %}
+{% block title %}Nueva cuenta bancaria{% endblock %}
 
 {% block body %}
 
     {{ include('panel/templates/header.html.twig') }}
-
     {{ include('panel/templates/sidebar.html.twig') }}
 
     <main class="content">
 
-       {{ form_errors(newAccountForm) }}
+        {# ============================================================ #}
+        {# BREADCRUMB                                                    #}
+        {# ============================================================ #}
+        <nav class="breadcrumb-nav">
+            <a href="{{ path('panel_home') }}" class="breadcrumb-link">Panel</a>
+            <span class="breadcrumb-sep">›</span>
+            <span class="breadcrumb-current">Nueva cuenta bancaria</span>
+        </nav>
 
-        {{ form_start(newAccountForm, { attr: {class: 'card', id: "form-create-bank-account"}}) }}
-            <h1 class="titulo-panel">Crear nueva cuenta bancaria</h1>
-            <p class="text-panel">Creará una nueva cuenta bancaria y la asociará a tu usuario y puedes asociarla a otro usuario de la plataforma</p>
-            {{ form_row(newAccountForm.iban, { attr: {id: "iban"}}) }}
-            {{ form_row(newAccountForm.nombre_banco) }}
-            {{ form_row(newAccountForm.titular) }}
-            {{ form_row(newAccountForm.alias) }}
-            {{ form_row(newAccountForm.usuario_asociado, { attr: {class: 'select-bootstrap'}}) }}
+        {# ============================================================ #}
+        {# CABECERA                                                      #}
+        {# ============================================================ #}
+        <div class="cuentas-form-header">
+            <div class="cuentas-form-header-icon cuentas-form-header-icon-create">🏦</div>
+            <div>
+                <h1 class="pi-titulo" style="color: #1a2332;">Nueva cuenta bancaria</h1>
+                <p class="bulk-card-desc" style="margin: 0;">
+                    Crea una nueva cuenta bancaria y asóciala a tu usuario. También puedes vincularla a otro usuario de la plataforma.
+                </p>
+            </div>
+        </div>
 
-            <button type="submit" class="btn btn-primary">Añadir cuenta</button>
-        {{ form_end(newAccountForm) }}
-        
+        {# ============================================================ #}
+        {# FORMULARIO                                                    #}
+        {# ============================================================ #}
+        <div class="addmov-layout">
+
+            <div class="card addmov-form-card">
+
+                <h2 class="bulk-card-titulo">Datos de la cuenta</h2>
+
+                {{ form_errors(newAccountForm) }}
+
+                {{ form_start(newAccountForm, { attr: { id: 'form-create-bank-account', class: 'addmov-form' } }) }}
+
+                    <div class="addmov-fields">
+
+                        <div class="addmov-field-group">
+                            <label class="addmov-label">
+                                IBAN
+                                <span class="addmov-label-hint">Se validará automáticamente</span>
+                            </label>
+                            {{ form_widget(newAccountForm.iban, { attr: { id: 'iban', class: 'addmov-input', placeholder: 'Ej: ES12 3456 7890 1234 5678 9012' } }) }}
+                            {{ form_errors(newAccountForm.iban) }}
+                            <span class="cuentas-iban-status" id="iban-status"></span>
+                        </div>
+
+                        <div class="addmov-field-group">
+                            <label class="addmov-label">Nombre del banco</label>
+                            {{ form_widget(newAccountForm.nombre_banco, { attr: { class: 'addmov-input', placeholder: 'Ej: CaixaBank' } }) }}
+                            {{ form_errors(newAccountForm.nombre_banco) }}
+                        </div>
+
+                        <div class="addmov-field-group">
+                            <label class="addmov-label">Titular</label>
+                            {{ form_widget(newAccountForm.titular, { attr: { class: 'addmov-input', placeholder: 'Nombre del titular de la cuenta' } }) }}
+                            {{ form_errors(newAccountForm.titular) }}
+                        </div>
+
+                        <div class="addmov-field-group">
+                            <label class="addmov-label">
+                                Alias
+                                <span class="addmov-label-hint">Un nombre corto para identificarla fácilmente</span>
+                            </label>
+                            {{ form_widget(newAccountForm.alias, { attr: { class: 'addmov-input', placeholder: 'Ej: Cuenta nómina' } }) }}
+                            {{ form_errors(newAccountForm.alias) }}
+                        </div>
+
+                        <div class="addmov-field-group">
+                            <label class="addmov-label">
+                                Usuario asociado
+                                <span class="addmov-label-hint">Opcional</span>
+                            </label>
+                            {{ form_widget(newAccountForm.usuario_asociado, { attr: { class: 'addmov-input cat-select' } }) }}
+                            {{ form_errors(newAccountForm.usuario_asociado) }}
+                        </div>
+
+                    </div>
+
+                    <div class="addmov-form-footer">
+                        <a href="{{ path('panel_home') }}" class="bulk-btn-cancelar">Cancelar</a>
+                        <button type="submit" class="btn btn-primary bulk-btn-subir">Añadir cuenta</button>
+                    </div>
+
+                {{ form_end(newAccountForm) }}
+
+            </div>
+
+            {# --- Info lateral --- #}
+            <div class="card addmov-info-card">
+                <h3 class="bulk-card-titulo">¿Qué es el IBAN?</h3>
+
+                <div class="addmov-tip">
+                    <span class="addmov-tip-icon">🔢</span>
+                    <div>
+                        <span class="addmov-tip-titulo">Formato</span>
+                        <p class="addmov-tip-texto">El IBAN español tiene 24 caracteres y empieza por <code>ES</code> seguido de 22 dígitos. Puedes encontrarlo en tu app bancaria o en cualquier extracto.</p>
+                    </div>
+                </div>
+
+                <div class="addmov-tip">
+                    <span class="addmov-tip-icon">🔒</span>
+                    <div>
+                        <span class="addmov-tip-titulo">Privacidad</span>
+                        <p class="addmov-tip-texto">El IBAN solo se usa para identificar la cuenta dentro de la aplicación. No se realiza ninguna operación bancaria real.</p>
+                    </div>
+                </div>
+
+                <div class="addmov-tip">
+                    <span class="addmov-tip-icon">👤</span>
+                    <div>
+                        <span class="addmov-tip-titulo">Usuario asociado</span>
+                        <p class="addmov-tip-texto">Si convives con otra persona registrada en la plataforma, puedes asociarla a esta cuenta para compartir su seguimiento.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
     </main>
 
     <script>
-    
+        function isValidIBAN(iban) {
+            iban = iban.replace(/\s+/g, '').toUpperCase();
+            if (!/^[A-Z0-9]+$/.test(iban)) return false;
+            iban = iban.slice(4) + iban.slice(0, 4);
+            iban = iban.replace(/[A-Z]/g, ch => ch.charCodeAt(0) - 55);
+            let remainder = iban;
+            while (remainder.length > 2) {
+                let block = remainder.slice(0, 9);
+                remainder = (parseInt(block, 10) % 97) + remainder.slice(block.length);
+            }
+            return parseInt(remainder, 10) % 97 === 1;
+        }
 
-    function isValidIBAN(iban) {
-        iban = iban.replace(/\s+/g, '').toUpperCase();
-        if (!/^[A-Z0-9]+$/.test(iban)) return false;
+        document.addEventListener('DOMContentLoaded', function () {
+            const ibanInput  = document.getElementById('iban') || document.getElementById('create_account_form_iban');
+            const ibanStatus = document.getElementById('iban-status');
 
-        // Mueve los 4 primeros caracteres al final
-        iban = iban.slice(4) + iban.slice(0, 4);
+            if (!ibanInput) return;
 
-        // Reemplaza letras por números (A=10, B=11, ..., Z=35)
-        iban = iban.replace(/[A-Z]/g, function(ch) {
-            return ch.charCodeAt(0) - 55;
-        });
+            ibanInput.addEventListener('blur', function () {
+                const val = ibanInput.value.trim();
+                if (!val) { ibanStatus.textContent = ''; return; }
 
-        // Calcula el módulo 97
-        let remainder = iban;
-        while (remainder.length > 2) {
-            let block = remainder.slice(0, 9);
-            remainder = (parseInt(block, 10) % 97) + remainder.slice(block.length);
-        }
-
-        return parseInt(remainder, 10) % 97 === 1;
-    }
-
-    
-    document.addEventListener('DOMContentLoaded', function () {
-        const ibanInput = document.getElementById('create_account_form_iban');
-        ibanInput.addEventListener('blur', function () {
-            const isValid = isValidIBAN(ibanInput.value);
-            if (!isValid) {
-                console.log('El IBAN introducido no es válido.');
-                ibanInput.classList.add('is-invalid');
-            } else {
-                ibanInput.classList.remove('is-invalid');
-            }
-        });
-    });
-
-
+                if (isValidIBAN(val)) {
+                    ibanInput.classList.remove('is-invalid');
+                    ibanInput.classList.add('is-valid');
+                    ibanStatus.textContent = '✓ IBAN válido';
+                    ibanStatus.className = 'cuentas-iban-status cuentas-iban-valid';
+                } else {
+                    ibanInput.classList.add('is-invalid');
+                    ibanInput.classList.remove('is-valid');
+                    ibanStatus.textContent = '✕ IBAN no válido';
+                    ibanStatus.className = 'cuentas-iban-status cuentas-iban-invalid';
+                }
+            });
+        });
     </script>
 
 {% endblock %}

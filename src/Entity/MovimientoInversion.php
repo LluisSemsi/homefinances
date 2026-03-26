@@ -51,12 +51,12 @@ class MovimientoInversion
         return $this->id;
     }
 
-    public function getFecha(): ?\DateTimeImmutable
+    public function getFecha(): ?\DateTimeInterface
     {
         return $this->fecha;
     }
 
-    public function setFecha(\DateTimeImmutable $fecha): static
+    public function setFecha(\DateTimeInterface $fecha): static
     {
         $this->fecha = $fecha;
 

@@ -1,0 +1,318 @@
+{% extends 'base/base.html.twig' %}
+
+{% block title %}{{ producto.getNombre() }}{% endblock %}
+
+{% block body %}
+
+    {{ include('panel/templates/header.html.twig') }}
+
+    {{ include('panel/templates/sidebar.html.twig') }}
+
+    <main class="content">
+
+        {# ============================================================ #}
+        {# BREADCRUMB                                                    #}
+        {# ============================================================ #}
+        <nav class="breadcrumb-nav">
+            <a href="{{ path('inversiones') }}" class="breadcrumb-link">Inversiones</a>
+            <span class="breadcrumb-sep">›</span>
+            <span class="breadcrumb-current">{{ producto.getNombre() }}</span>
+        </nav>
+
+        {# ============================================================ #}
+        {# CABECERA DEL PRODUCTO                                         #}
+        {# ============================================================ #}
+
+        {% set totalActual    = producto.getTotalActualFondo() %}
+        {% set totalInvertido = producto.getTotalInvertido() %}
+        {% set rentabilidadAbs = totalActual - totalInvertido %}
+        {% set rentabilidadPct = totalInvertido > 0 ? (rentabilidadAbs / totalInvertido) * 100 : 0 %}
+
+        <div class="pi-header-card">
+            <div class="pi-header-left">
+                <span class="pi-label">Producto de inversión</span>
+                <h1 class="pi-titulo">{{ producto.getNombre() }}</h1>
+                <div class="pi-meta">
+                    <span class="pi-meta-item">
+                        <span class="pi-meta-icon">📋</span>
+                        Nº contrato: <strong>{{ producto.getNumContrato() }}</strong>
+                    </span>
+                    <span class="pi-meta-sep">·</span>
+                    <span class="pi-meta-item">
+                        <span class="pi-meta-icon">📅</span>
+                        Apertura: <strong>{{ producto.getFechaApertura()|date('d/m/Y') }}</strong>
+                    </span>
+                    <span class="pi-meta-sep">·</span>
+                    <span class="pi-meta-item">
+                        <span class="pi-meta-icon">📁</span>
+                        {{ producto.getFondos()|length }} fondo{{ producto.getFondos()|length != 1 ? 's' : '' }}
+                    </span>
+                </div>
+            </div>
+            <div class="pi-header-stats">
+                <div class="pi-stat-box">
+                    <span class="pi-stat-label">Capital aportado</span>
+                    <span class="pi-stat-value">{{ totalInvertido|number_format(2, ',', '.') }}€</span>
+                </div>
+                <div class="pi-stat-box">
+                    <span class="pi-stat-label">Valor actual</span>
+                    <span class="pi-stat-value highlight">{{ totalActual|number_format(2, ',', '.') }}€</span>
+                </div>
+                <div class="pi-stat-box">
+                    <span class="pi-stat-label">Rentabilidad</span>
+                    <span class="pi-stat-value {{ rentabilidadAbs >= 0 ? 'positive-number' : 'negative-number' }}">
+                        {{ rentabilidadAbs >= 0 ? '+' : '' }}{{ rentabilidadAbs|number_format(2, ',', '.') }}€
+                    </span>
+                    <span class="pi-stat-pct {{ rentabilidadPct >= 0 ? 'positive-number' : 'negative-number' }}">
+                        {{ rentabilidadPct >= 0 ? '+' : '' }}{{ rentabilidadPct|number_format(2, ',', '.') }}%
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        {# ============================================================ #}
+        {# FONDOS DEL PRODUCTO                                           #}
+        {# ============================================================ #}
+
+        <h2 class="pi-seccion-titulo">Fondos de inversión</h2>
+
+        {% for fondo in producto.getFondos() %}
+
+            {% set ultimoEstado = fondo.getUltimoEstado() %}
+
+            <div class="pi-fondo-card">
+
+                {# CABECERA DEL FONDO #}
+                <div class="pi-fondo-header">
+                    <div class="pi-fondo-header-left">
+                        <div class="pi-isin-chip">{{ fondo.getIsin() }}</div>
+                        <div>
+                            <h3 class="pi-fondo-nombre">{{ fondo.getNombre() }}</h3>
+                        </div>
+                    </div>
+                    <div class="pi-fondo-header-right">
+                        {% if ultimoEstado %}
+                            <div class="pi-fondo-rentabilidad-badge {{ ultimoEstado.getDiferenciaTotal() >= 0 ? 'badge-pos' : 'badge-neg' }}">
+                                <span class="badge-arrow">{{ ultimoEstado.getDiferenciaTotal() >= 0 ? '▲' : '▼' }}</span>
+                                <span class="badge-pct">{{ ultimoEstado.getDiferenciaTotalPercent()|number_format(2, ',', '.') }}%</span>
+                                <span class="badge-abs">({{ ultimoEstado.getDiferenciaTotal() >= 0 ? '+' : '' }}{{ ultimoEstado.getDiferenciaTotal()|number_format(2, ',', '.') }}€)</span>
+                            </div>
+                        {% endif %}
+                        <a href="{{ path('anadir-estado-fondo', { id: fondo.getId() }) }}" class="btn-añadir-estado">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+                            </svg>
+                            Añadir estado
+                        </a>
+                    </div>
+                </div>
+
+
+                {% if ultimoEstado %}
+
+                    {# DATOS PRINCIPALES EN GRID #}
+                    <div class="pi-datos-grid">
+
+                        <div class="pi-dato-item">
+                            <span class="pi-dato-label">Valor actual</span>
+                            <span class="pi-dato-valor highlight">{{ ultimoEstado.getValorActual()|number_format(2, ',', '.') }}€</span>
+                        </div>
+
+                        <div class="pi-dato-item">
+                            <span class="pi-dato-label">Importe invertido</span>
+                            <span class="pi-dato-valor">{{ ultimoEstado.getImporteInvertido()|number_format(2, ',', '.') }}€</span>
+                        </div>
+
+                        <div class="pi-dato-item">
+                            <span class="pi-dato-label">Nº participaciones</span>
+                            <span class="pi-dato-valor">{{ ultimoEstado.getNumParticipaciones()|number_format(4, ',', '.') }}</span>
+                        </div>
+
+                        <div class="pi-dato-item">
+                            <span class="pi-dato-label">Precio medio</span>
+                            <span class="pi-dato-valor">{{ ultimoEstado.getPrecioMedio()|number_format(2, ',', '.') }}€</span>
+                        </div>
+
+                        <div class="pi-dato-item">
+                            <span class="pi-dato-label">Último precio</span>
+                            <span class="pi-dato-valor">{{ ultimoEstado.getUltimoPrecio()|number_format(2, ',', '.') }}€</span>
+                        </div>
+
+                        <div class="pi-dato-item">
+                            <span class="pi-dato-label">Dif. precio (€)</span>
+                            <span class="pi-dato-valor {{ ultimoEstado.getDiferencia() >= 0 ? 'positive-number' : 'negative-number' }}">
+                                {{ ultimoEstado.getDiferencia() >= 0 ? '+' : '' }}{{ ultimoEstado.getDiferencia()|number_format(2, ',', '.') }}€
+                            </span>
+                        </div>
+
+                        <div class="pi-dato-item">
+                            <span class="pi-dato-label">Dividendos</span>
+                            <span class="pi-dato-valor positive-number">{{ ultimoEstado.getDividendos()|number_format(2, ',', '.') }}€</span>
+                        </div>
+
+                        <div class="pi-dato-item">
+                            <span class="pi-dato-label">Periodicidad</span>
+                            <span class="pi-dato-valor">{{ ultimoEstado.getPeriodicidad() }}</span>
+                        </div>
+
+                        <div class="pi-dato-item">
+                            <span class="pi-dato-label">Duración</span>
+                            <span class="pi-dato-valor">{{ ultimoEstado.getDuracion() }}</span>
+                        </div>
+
+                        <div class="pi-dato-item">
+                            <span class="pi-dato-label">Último estado</span>
+                            <span class="pi-dato-valor">{{ ultimoEstado.getFecha()|date('d/m/Y') }}</span>
+                        </div>
+
+                    </div>
+
+                    {# BARRA DE PROGRESO VISUAL #}
+                    {% set pct = ultimoEstado.getImporteInvertido() > 0
+                        ? (ultimoEstado.getValorActual() / ultimoEstado.getImporteInvertido() * 100)
+                        : 100 %}
+                    {% set pctCapped = pct > 100 ? 100 : pct %}
+
+                    <div class="pi-progreso-container">
+                        <div class="pi-progreso-labels">
+                            <span>Aportado: {{ ultimoEstado.getImporteInvertido()|number_format(2, ',', '.') }}€</span>
+                            <span>Valor actual: {{ ultimoEstado.getValorActual()|number_format(2, ',', '.') }}€ ({{ pct|number_format(1, ',', '.') }}%)</span>
+                        </div>
+                        <div class="pi-progreso-track">
+                            <div class="pi-progreso-fill {{ ultimoEstado.getDiferenciaTotal() >= 0 ? 'progreso-pos' : 'progreso-neg' }}"
+                                 style="width: {{ pctCapped }}%"></div>
+                        </div>
+                    </div>
+
+                    {# HISTORIAL DE ESTADOS DEL FONDO #}
+                    {% if fondo.getEstados()|length > 1 %}
+                        <div class="pi-historial-section">
+                            <button class="pi-historial-toggle" onclick="toggleHistorial('historial-{{ fondo.getId() }}', this)">
+                                Ver historial de estados ({{ fondo.getEstados()|length }})
+                                <span class="toggle-arrow">▼</span>
+                            </button>
+                            <div class="pi-historial-table-wrap" id="historial-{{ fondo.getId() }}" style="display:none">
+                                <table class="pi-historial-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>Participaciones</th>
+                                            <th>Precio medio</th>
+                                            <th>Último precio</th>
+                                            <th>Importe invertido</th>
+                                            <th>Valor actual</th>
+                                            <th>Diferencia total</th>
+                                            <th>Rentab. %</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% set estados = fondo.getEstados()|sort((a, b) => b.getFecha() <=> a.getFecha()) %}
+                                        {% for estado in estados %}
+                                            <tr class="pi-historial-row {{ estado.getDiferenciaTotal() >= 0 ? 'row-pos' : 'row-neg' }}">
+                                                <td>{{ estado.getFecha()|date('d/m/Y') }}</td>
+                                                <td>{{ estado.getNumParticipaciones()|number_format(4, ',', '.') }}</td>
+                                                <td>{{ estado.getPrecioMedio()|number_format(2, ',', '.') }}€</td>
+                                                <td>{{ estado.getUltimoPrecio()|number_format(2, ',', '.') }}€</td>
+                                                <td>{{ estado.getImporteInvertido()|number_format(2, ',', '.') }}€</td>
+                                                <td class="highlight">{{ estado.getValorActual()|number_format(2, ',', '.') }}€</td>
+                                                <td class="{{ estado.getDiferenciaTotal() >= 0 ? 'positive-number' : 'negative-number' }}">
+                                                    {{ estado.getDiferenciaTotal() >= 0 ? '+' : '' }}{{ estado.getDiferenciaTotal()|number_format(2, ',', '.') }}€
+                                                </td>
+                                                <td class="{{ estado.getDiferenciaTotalPercent() >= 0 ? 'positive-number' : 'negative-number' }}">
+                                                    {{ estado.getDiferenciaTotalPercent() >= 0 ? '+' : '' }}{{ estado.getDiferenciaTotalPercent()|number_format(2, ',', '.') }}%
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {# MOVIMIENTOS DEL FONDO #}
+                    {% if fondo.getMovimientos()|length > 0 %}
+                        <div class="pi-movimientos-section">
+                            <button class="pi-historial-toggle" onclick="toggleHistorial('movimientos-{{ fondo.getId() }}', this)">
+                                Ver aportaciones ({{ fondo.getMovimientos()|length }})
+                                <span class="toggle-arrow">▼</span>
+                            </button>
+                            <div class="pi-historial-table-wrap" id="movimientos-{{ fondo.getId() }}" style="display:none">
+                                <table class="pi-historial-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>Tipo</th>
+                                            <th>Participaciones</th>
+                                            <th>Precio unitario</th>
+                                            <th>Importe bruto</th>
+                                            <th>Importe neto</th>
+                                            <th>Comisión</th>
+                                            <th>Retención</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% set movimientos = fondo.getMovimientos()|sort((a, b) => b.getFecha() <=> a.getFecha()) %}
+                                        {% for movimiento in movimientos %}
+                                            <tr class="pi-historial-row">
+                                                <td>{{ movimiento.getFecha()|date('d/m/Y') }}</td>
+                                                <td>
+                                                    <span class="pi-tipo-badge">{{ movimiento.getTipo().getNombre() }}</span>
+                                                </td>
+                                                <td>{{ movimiento.getNumParticipaciones()|number_format(4, ',', '.') }}</td>
+                                                <td>{{ movimiento.getPrecioUnitario()|number_format(4, ',', '.') }}€</td>
+                                                <td>{{ movimiento.getImporteBrutoAportado()|number_format(2, ',', '.') }}€</td>
+                                                <td class="highlight">{{ movimiento.getImporteNetoAportado()|number_format(2, ',', '.') }}€</td>
+                                                <td class="negative-number">
+                                                    {% if movimiento.getComisionMovimiento() > 0 %}
+                                                        -{{ movimiento.getComisionMovimiento()|number_format(2, ',', '.') }}€
+                                                    {% else %}
+                                                        —
+                                                    {% endif %}
+                                                </td>
+                                                <td class="negative-number">
+                                                    {% if movimiento.getImporteRetencion() > 0 %}
+                                                        -{{ movimiento.getImporteRetencion()|number_format(2, ',', '.') }}€
+                                                    {% else %}
+                                                        —
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                {% else %}
+                    <div class="pi-sin-datos">
+                        <p class="text">No hay datos de estado disponibles para este fondo.</p>
+                    </div>
+                {% endif %}
+
+            </div>{# fin pi-fondo-card #}
+
+        {% else %}
+            <div class="card" style="text-align:center; padding: 3rem;">
+                <p class="text">Este producto no tiene fondos asociados.</p>
+            </div>
+        {% endfor %}
+
+        {# BOTÓN VOLVER #}
+        <div class="pi-volver">
+            <a href="{{ path('inversiones') }}" class="btn-ver-mas">← Volver a inversiones</a>
+        </div>
+
+    </main>
+
+    <script>
+        function toggleHistorial(id, btn) {
+            const el = document.getElementById(id);
+            const arrow = btn.querySelector('.toggle-arrow');
+            const visible = el.style.display !== 'none';
+            el.style.display = visible ? 'none' : 'block';
+            arrow.style.transform = visible ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+    </script>
+
+{% endblock %}

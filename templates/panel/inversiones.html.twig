@@ -66,7 +66,109 @@
             <div id="grafico-evolucion"></div>
         </div>
 
-        
+        <div id="productos-inversion-container">
+            <h2 class="titulo-seccion-inversiones">Tus productos de inversión</h2>
+
+            {% for producto in productos %}
+                {% set totalActual = producto.getTotalActualFondo() %}
+                {% set totalInvertido = producto.getTotalInvertido() %}
+                {% set rentabilidadAbs = totalActual - totalInvertido %}
+                {% set rentabilidadPct = totalInvertido > 0 ? (rentabilidadAbs / totalInvertido) * 100 : 0 %}
+
+                <div class="producto-card">
+
+                    {# CABECERA DEL PRODUCTO #}
+                    <div class="producto-header">
+                        <div class="producto-header-info">
+                            <span class="producto-label">Contrato</span>
+                            <h3 class="producto-nombre">{{ producto.getNombre() }}</h3>
+                            <span class="producto-contrato">Nº {{ producto.getNumContrato() }}</span>
+                        </div>
+                        <div class="producto-header-stats">
+                            <div class="producto-stat">
+                                <span class="stat-label">Valor actual</span>
+                                <span class="stat-value">{{ totalActual|number_format(2, ',', '.') }}€</span>
+                            </div>
+                            <div class="producto-stat">
+                                <span class="stat-label">Capital aportado</span>
+                                <span class="stat-value">{{ totalInvertido|number_format(2, ',', '.') }}€</span>
+                            </div>
+                            <div class="producto-stat">
+                                <span class="stat-label">Rentabilidad</span>
+                                <span class="stat-value {{ rentabilidadAbs >= 0 ? 'positive-number' : 'negative-number' }}">
+                                    {{ rentabilidadAbs >= 0 ? '+' : '' }}{{ rentabilidadAbs|number_format(2, ',', '.') }}€
+                                    <small class="{{ rentabilidadPct >= 0 ? 'positive-number' : 'negative-number' }}">
+                                        ({{ rentabilidadPct >= 0 ? '+' : '' }}{{ rentabilidadPct|number_format(2, ',', '.') }}%)
+                                    </small>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# FONDOS DEL PRODUCTO #}
+                    <div class="fondos-grid">
+                        {% for fondo in producto.getFondos() %}
+                            {% set ultimoEstado = fondo.getUltimoEstado() %}
+                            {% set fondoValorActual = ultimoEstado ? ultimoEstado.getValorActual() : 0 %}
+                            {% set fondoImporteInvertido = ultimoEstado ? ultimoEstado.getImporteInvertido() : 0 %}
+                            {% set fondoDiferencia = ultimoEstado ? ultimoEstado.getDiferenciaTotal() : 0 %}
+                            {% set fondoDiferenciaPct = ultimoEstado ? ultimoEstado.getDiferenciaTotalPercent() : 0 %}
+
+                            <div class="fondo-card">
+                                <div class="fondo-header">
+                                    <div class="fondo-isin-badge">{{ fondo.getIsin() }}</div>
+                                    <span class="fondo-diferencia-badge {{ fondoDiferencia >= 0 ? 'badge-positive' : 'badge-negative' }}">
+                                        {{ fondoDiferencia >= 0 ? '▲' : '▼' }}
+                                        {{ fondoDiferenciaPct|number_format(2, ',', '.') }}%
+                                    </span>
+                                </div>
+                                <p class="fondo-nombre">{{ fondo.getNombre() }}</p>
+                                <div class="fondo-stats">
+                                    <div class="fondo-stat-row">
+                                        <span class="fondo-stat-label">Valor actual</span>
+                                        <span class="fondo-stat-value">{{ fondoValorActual|number_format(2, ',', '.') }}€</span>
+                                    </div>
+                                    <div class="fondo-stat-row">
+                                        <span class="fondo-stat-label">Aportado</span>
+                                        <span class="fondo-stat-value">{{ fondoImporteInvertido|number_format(2, ',', '.') }}€</span>
+                                    </div>
+                                    <div class="fondo-stat-row">
+                                        <span class="fondo-stat-label">Resultado</span>
+                                        <span class="fondo-stat-value {{ fondoDiferencia >= 0 ? 'positive-number' : 'negative-number' }}">
+                                            {{ fondoDiferencia >= 0 ? '+' : '' }}{{ fondoDiferencia|number_format(2, ',', '.') }}€
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {% if ultimoEstado %}
+                                    <div class="fondo-progress-bar">
+                                        {% set pct = fondoImporteInvertido > 0 ? (fondoValorActual / fondoImporteInvertido * 100) : 100 %}
+                                        <div class="progress-track">
+                                            <div class="progress-fill {{ fondoDiferencia >= 0 ? 'progress-positive' : 'progress-negative' }}"
+                                                style="width: {{ pct > 100 ? 100 : pct }}%"></div>
+                                        </div>
+                                        <span class="progress-label">{{ pct|number_format(1, ',', '.') }}% sobre aportado</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    {# PIE DEL PRODUCTO #}
+                    <div class="producto-footer">
+                        <span class="producto-fecha">Abierto el {{ producto.getFechaApertura()|date('d/m/Y') }}</span>
+                        <a href="{{ path('producto-inversion', { id: producto.getId() }) }}" class="btn-ver-mas">
+                            Ver detalles completos →
+                        </a>
+                    </div>
+
+                </div>
+            {% else %}
+                <div class="card" style="text-align:center; padding: 3rem;">
+                    <p class="text">No tienes productos de inversión registrados.</p>
+                </div>
+            {% endfor %}
+        </div>      
 
         
     </main>

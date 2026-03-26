@@ -1,0 +1,155 @@
+{% extends 'base/base.html.twig' %}
+
+{% block title %}Tu panel{% endblock %}
+
+{% block body %}
+
+    {{ include('panel/templates/header.html.twig') }}
+
+    {{ include('panel/templates/sidebar.html.twig') }}
+
+    <main class="content">
+
+        <div id="short-summary-container">
+            <div class="card summary-card">
+                <div>
+                    <img src="{{ asset('images/icons/bank-accounts.png') }}" alt="Icono número de cuentas" class="panel-icon">
+                </div>
+                <div>
+                    <h2>Cuentas totales</h2>
+                    <p class="summary-data">{{num_cuentas_usuario}}</p>
+                </div>
+            </div>
+            <div class="card summary-card">
+                <div>
+                    <img src="{{ asset('images/icons/total-money.png') }}" alt="Icono saldo de cuentas" class="panel-icon">
+                </div>
+                <div>
+                    <h2>Saldo total</h2>
+                    <p class="summary-data {{ saldo_total_cuentas < 0 ? 'negative-number' : 'positive-number' }}">{{saldo_total_cuentas}}€</p>
+                </div>
+            </div>
+            <div class="card summary-card">
+                <div>
+                    <img src="{{ asset('images/icons/grafica.png') }}" alt="Icono saldo de cuentas" class="panel-icon">
+                </div>
+                <div>
+                    <h2>Ingresos del mes</h2>
+                    <p class="summary-data {{ ingresos_mes < 0 ? 'negative-number' : 'positive-number' }}">{{ingresos_mes}}€</p>
+                </div>
+            </div>
+            <div class="card summary-card">
+                <div>
+                    <img src="{{ asset('images/icons/total-money.png') }}" alt="Icono saldo de cuentas" class="panel-icon">
+                </div>
+                <div>
+                    <h2>Balance mensual</h2>
+                    <p class="summary-data {{ balance_mes < 0 ? 'negative-number' : 'positive-number' }}">{{balance_mes}}€</p>
+                </div>
+            </div>
+        </div>
+        
+        <a href="{{ path('crear-cuentas-bancarias') }}" class="boton-flotante-nueva-cuenta"><img src="{{ asset('images/create-icon.png') }}" alt="Crear Cuenta Bancaria"></a>
+
+        <hr>
+
+        <div id="main-container">
+            <div class="card-grid" id="grid-cuentas">
+
+                {% if num_cuentas_usuario <= 0 %}
+                
+                    <div class="card">
+                    
+                        <div class="no-cuentas">
+                            <div id="cont-img-no-cuentas">
+                                <img src="{{ asset('images/caja_fuerte_vacia.png') }}" alt="No hay cuentas">
+                            </div>
+                            <div class="no-cuentas-texto">
+                                <h1 class="titulo-panel">Bienvenido {{ user.username }}</h1>
+                                <p class="text-panel">Vemos que no tienes aun ninguna cuenta bancaria asociada. Es el momento de empezar. Pulsa el siguiente botón y empezamos a crearte cuentas.</p>
+                                <div class="cont-boton-no-cuentas">
+                                    <a href="{{ path('crear-cuentas-bancarias') }}"><button class="btn btn-primary">Crear cuentas</button></a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                {% else %}
+                    
+                    {% for cuenta in cuentas_bancarias %}
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <div>
+                                        <img src="{{ asset('images/icons/' ~ cuenta.getImage()) }}" alt="Logo Banco" class="logo-banco">
+                                        <span class="card-title">{{ cuenta.getNombreBanco() }}</span>
+                                        <span class="card-subtitle">({{ cuenta.getAlias() }})</span>
+                                    </div>                            
+                                    <span class="card-icon">{{ cuenta.getSaldo() }}€</span>
+                                </div>
+                                <div class="card-body">
+                                    <h4 class="subtitle-card">Últimos movimientos</h4>
+                                    {% if cuenta.getMovimientosBancarios()|length == 0 %}
+                                        <span class="span-card">No hay movimientos registrados en la cuenta</span>
+                                    {% else %}
+                                        <div class="cont-movimientos-home">
+                                        {% for movimiento in cuenta.getMovimientosBancarios()|reverse|slice(0,3) %}
+                                            <div class="cont-movimiento">
+                                                <div class="cont-fecha">
+                                                    <p>{{ movimiento.getFecha()|date('d/m/Y H:i') }}</p>
+                                                </div>
+                                                <div class="cont-concepto">
+                                                    <p>{{ movimiento.getConcepto() }}</p>
+                                                </div>
+                                                <div class="cont-importe {{ movimiento.getCantidad() < 0 ? 'negative-number' : 'positive-number' }}">
+                                                    <p>{{ movimiento.getCantidad() }}€</p>
+                                                </div>
+                                                <div class="cont-saldo">
+                                                    <p>{{ movimiento.getSaldoActual() }}€</p>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                
+                                    <button class="menu-button" onclick="toggleDropdown('{{ cuenta.getIban() }}')">⋮</button>
+                                    <div class="dropdown" id="dropdownMenu_{{ cuenta.getIban() }}">
+                                        <a href="{{ path('detalles-cuenta-bancaria', { iban: cuenta.getIban() }) }}">Ver detalles cuenta</a>
+                                        <a href="{{ path('add-movimientos', { iban: cuenta.getIban() }) }}">Añadir Movimiento Único</a>
+                                        <a href="{{ path('categorizar-movimientos-bancarios', { iban: cuenta.getIban() }) }}">Categorizar movimientos</a>
+                                        <a href="{{ path('bulk-movimientos-bancarios', { iban: cuenta.getIban() }) }}">Añadir Movimientos Desde Fichero</a>
+                                        <a href="{{ path('editar-cuenta', { iban: cuenta.getIban() }) }}">Editar Cuenta</a>
+                                        <a href="{{ path('eliminar-cuenta', { iban: cuenta.getIban() }) }}">Eliminar Cuenta</a>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                    {% endfor %}
+
+                {% endif %}
+
+                
+            </div>
+            <div id="aside-right-main-container">
+                <div class="card">
+                    <h3>Probando</h3>
+                </div>
+                <div class="card">
+                    <h3>Probando</h3>
+                </div>
+            </div>
+        </div>
+
+        
+    </main>
+    <script>
+
+        function toggleDropdown(iban) {
+            const dropdown = document.getElementById("dropdownMenu_" + iban);
+            dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+          }
+
+    </script>
+{% endblock %}

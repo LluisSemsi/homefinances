@@ -75,6 +75,15 @@ inversiones:
     path: /inversiones
     controller: App\Controller\PanelController::inversiones
 
+producto-inversion:
+    path: /panel/inversiones/producto/{id}
+    controller: App\Controller\PanelController::productoInversion
+
+anadir-estado-fondo:
+    path:       /panel/inversiones/fondo/{id}/anadir-estado
+    controller: App\Controller\PanelController::anadirEstadoFondo
+    methods:    [GET, POST]
+
 
 # -------------------------------- #
 #         Rutas JavaScript         #

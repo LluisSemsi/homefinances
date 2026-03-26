@@ -68,12 +68,12 @@ class ProductoInversion
         return $this;
     }
 
-    public function getFechaApertura(): ?\DateTimeImmutable
+    public function getFechaApertura(): ?\DateTimeInterface
     {
         return $this->fechaApertura;
     }
 
-    public function setFechaApertura(\DateTimeImmutable $fechaApertura): static
+    public function setFechaApertura(\DateTimeInterface $fechaApertura): static
     {
         $this->fechaApertura = $fechaApertura;
 

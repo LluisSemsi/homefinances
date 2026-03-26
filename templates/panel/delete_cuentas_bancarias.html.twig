@@ -1,40 +1,74 @@
 {% extends 'base/base.html.twig' %}
 
-{% block title %}Tu panel{% endblock %}
+{% block title %}Eliminar cuenta — {{ cuenta.getNombreBanco() }}{% endblock %}
 
 {% block body %}
 
     {{ include('panel/templates/header.html.twig') }}
-
     {{ include('panel/templates/sidebar.html.twig') }}
 
     <main class="content">
 
-       <div id="delete-cuenta-bancaria">
-            <h1 class="titulo">Borrar cuenta bancaria</h1>
-            <p class="text">Este es el proceso de borrado de cuenta. Se borrará definitivamente la cuenta y toda la información almacenada relacionada con ella.</p>
-            
-            <div class="datos-cuenta">
-                <div>
-                    <img src="{{ asset('images/icons/' ~ cuenta.getImage()) }}" alt="Logo Banco" class="logo-banco">
-                    <h2 class="subtitulo">{{ cuenta.getNombreBanco() }}</h2>
-                    <p class="text"> - </p>
-                    <p class="text">{{ cuenta.getAlias() }}</p>
-                    <p class="text"> - </p>
-                    <p class="text"><b>IBAN:</b> {{ cuenta.getIBAN() }}</p>                  
-                </div>   
+        {# ============================================================ #}
+        {# BREADCRUMB                                                    #}
+        {# ============================================================ #}
+        <nav class="breadcrumb-nav">
+            <a href="{{ path('panel_home') }}" class="breadcrumb-link">Panel</a>
+            <span class="breadcrumb-sep">›</span>
+            <a href="{{ path('detalles-cuenta-bancaria', { iban: cuenta.getIban() }) }}" class="breadcrumb-link">
+                {{ cuenta.getNombreBanco() }}
+            </a>
+            <span class="breadcrumb-sep">›</span>
+            <span class="breadcrumb-current">Eliminar cuenta</span>
+        </nav>
+
+        {# ============================================================ #}
+        {# CONTENIDO                                                     #}
+        {# ============================================================ #}
+        <div class="delete-layout">
+
+            {# Tarjeta de confirmación #}
+            <div class="card delete-card">
+
+                {# Icono de advertencia #}
+                <div class="delete-warning-icon">🗑️</div>
+
+                <h1 class="delete-titulo">¿Eliminar esta cuenta?</h1>
+                <p class="delete-desc">
+                    Esta acción es <strong>permanente e irreversible</strong>. Se eliminará la cuenta bancaria
+                    y <strong>todos los movimientos</strong> asociados a ella.
+                </p>
+
+                {# Datos de la cuenta afectada #}
+                <div class="delete-cuenta-info">
+                    <img src="{{ asset('images/icons/' ~ cuenta.getImage()) }}" alt="Logo banco" class="delete-logo-banco">
+                    <div class="delete-cuenta-datos">
+                        <span class="delete-cuenta-nombre">{{ cuenta.getNombreBanco() }}</span>
+                        <span class="delete-cuenta-alias">{{ cuenta.getAlias() }}</span>
+                        <span class="delete-cuenta-iban">{{ cuenta.getIBAN() }}</span>
+                    </div>
+                </div>
+
+                {# Aviso final #}
+                <div class="cat-aviso" style="margin-bottom: 1.5rem;">
+                    <span class="cat-aviso-icon">⚠️</span>
+                    <p>Una vez eliminada no podrás recuperar ningún dato. Si solo quieres modificar la cuenta, utiliza la opción <em>Editar cuenta</em>.</p>
+                </div>
+
+                {# Botones #}
+                <div class="delete-botones">
+                    <a href="{{ path('detalles-cuenta-bancaria', { iban: cuenta.getIBAN() }) }}" class="delete-btn-cancelar">
+                        ← Cancelar, volver
+                    </a>
+                    <a href="{{ path('confirmar-eliminar-cuenta', { iban: cuenta.getIBAN() }) }}" class="delete-btn-confirmar">
+                        Sí, eliminar cuenta
+                    </a>
+                </div>
+
             </div>
 
-            <p class="text">Si estas seguro de borrar la cuenta bancaria pulse el botón <span class="text-green">"Borrar Cuenta"</span> y si no estas de acuerdo pulsa <span class="text-red">"Cancelar"</span></p>
+        </div>
 
-            <div class="cont-botones-horizontal">
-                <a href="{{ path('home') }}"><button class="btn btn-cancel">Cancelar</button></a>
-                <a href="{{ path('confirmar-eliminar-cuenta', { iban: cuenta.getIBAN() }) }}"><button class="btn btn-success">Borrar Cuenta</button></a>
-            </div>
-       </div>   
-        
     </main>
-
-   
 
 {% endblock %}

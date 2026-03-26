@@ -1,47 +1,210 @@
 {% extends 'base/base.html.twig' %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}HomeFinances — Accede a tu panel{% endblock %}
 
 {% block body %}
 
-    <div id="login-wrapper">
+<div id="login-wrapper">
 
-    <!-- MITAD IZQUIERDA (imagen) -->
-    <div class="login-left"></div>
+    <!-- MITAD IZQUIERDA — ilustración SVG generativa -->
+    <div class="login-left">
+        <div class="login-left-overlay">
+            <div class="login-left-content">
 
-    <!-- MITAD DERECHA (formulario) -->
+                <svg class="login-illustration" viewBox="0 0 560 620" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <!-- Gradientes para líneas de curva -->
+                        <linearGradient id="lg-blue" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#60aff5" stop-opacity="0.9"/>
+                            <stop offset="100%" stop-color="#1769aa" stop-opacity="0.3"/>
+                        </linearGradient>
+                        <linearGradient id="lg-green" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#4dd0a0" stop-opacity="0.8"/>
+                            <stop offset="100%" stop-color="#1a7a5e" stop-opacity="0.2"/>
+                        </linearGradient>
+                        <linearGradient id="lg-amber" x1="0" y1="1" x2="1" y2="0">
+                            <stop offset="0%" stop-color="#f5a623" stop-opacity="0.85"/>
+                            <stop offset="100%" stop-color="#c47a10" stop-opacity="0.2"/>
+                        </linearGradient>
+                        <linearGradient id="lg-red" x1="0" y1="1" x2="1" y2="0">
+                            <stop offset="0%" stop-color="#f56060" stop-opacity="0.7"/>
+                            <stop offset="100%" stop-color="#a82020" stop-opacity="0.15"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- ============================================ -->
+                    <!-- FONDO: cuadrícula de puntos                  -->
+                    <!-- ============================================ -->
+                    {% for row in 0..11 %}
+                        {% for col in 0..10 %}
+                            <circle cx="{{ 30 + col * 50 }}" cy="{{ 30 + row * 55 }}" r="1.2" fill="#ffffff" opacity="0.12"/>
+                        {% endfor %}
+                    {% endfor %}
+
+                    <!-- ============================================ -->
+                    <!-- GRÁFICO DE BARRAS (economía del hogar)       -->
+                    <!-- ============================================ -->
+                    <!-- Eje base -->
+                    <line x1="60" y1="410" x2="500" y2="410" stroke="#ffffff" stroke-width="0.5" opacity="0.2"/>
+
+                    <!-- Barras con alturas variadas — ingresos vs gastos -->
+                    <!-- Par 1 -->
+                    <rect x="80"  y="310" width="28" height="100" rx="4" fill="url(#lg-blue)"  opacity="0.85"/>
+                    <rect x="112" y="350" width="28" height="60"  rx="4" fill="url(#lg-red)"   opacity="0.75"/>
+                    <!-- Par 2 -->
+                    <rect x="160" y="290" width="28" height="120" rx="4" fill="url(#lg-blue)"  opacity="0.85"/>
+                    <rect x="192" y="340" width="28" height="70"  rx="4" fill="url(#lg-red)"   opacity="0.75"/>
+                    <!-- Par 3 -->
+                    <rect x="240" y="270" width="28" height="140" rx="4" fill="url(#lg-blue)"  opacity="0.85"/>
+                    <rect x="272" y="360" width="28" height="50"  rx="4" fill="url(#lg-red)"   opacity="0.75"/>
+                    <!-- Par 4 -->
+                    <rect x="320" y="300" width="28" height="110" rx="4" fill="url(#lg-blue)"  opacity="0.85"/>
+                    <rect x="352" y="355" width="28" height="55"  rx="4" fill="url(#lg-red)"   opacity="0.75"/>
+                    <!-- Par 5 -->
+                    <rect x="400" y="260" width="28" height="150" rx="4" fill="url(#lg-blue)"  opacity="0.85"/>
+                    <rect x="432" y="330" width="28" height="80"  rx="4" fill="url(#lg-red)"   opacity="0.75"/>
+
+                    <!-- Etiquetas mes -->
+                    <text x="96"  y="428" text-anchor="middle" fill="#ffffff" opacity="0.45" font-size="10" font-family="sans-serif">Oct</text>
+                    <text x="176" y="428" text-anchor="middle" fill="#ffffff" opacity="0.45" font-size="10" font-family="sans-serif">Nov</text>
+                    <text x="256" y="428" text-anchor="middle" fill="#ffffff" opacity="0.45" font-size="10" font-family="sans-serif">Dic</text>
+                    <text x="336" y="428" text-anchor="middle" fill="#ffffff" opacity="0.45" font-size="10" font-family="sans-serif">Ene</text>
+                    <text x="416" y="428" text-anchor="middle" fill="#ffffff" opacity="0.45" font-size="10" font-family="sans-serif">Feb</text>
+
+                    <!-- ============================================ -->
+                    <!-- LÍNEA DE TENDENCIA (saldo acumulado)         -->
+                    <!-- ============================================ -->
+                    <path d="M60,390 C130,370 180,340 240,310 S340,270 420,240 S500,220 530,210"
+                          fill="none" stroke="url(#lg-green)" stroke-width="2.5" stroke-linecap="round"/>
+                    <!-- Puntos en la línea -->
+                    <circle cx="60"  cy="390" r="4" fill="#4dd0a0" opacity="0.9"/>
+                    <circle cx="150" cy="355" r="4" fill="#4dd0a0" opacity="0.9"/>
+                    <circle cx="240" cy="310" r="4" fill="#4dd0a0" opacity="0.9"/>
+                    <circle cx="330" cy="275" r="4" fill="#4dd0a0" opacity="0.9"/>
+                    <circle cx="420" cy="242" r="4" fill="#4dd0a0" opacity="0.9"/>
+                    <!-- Tooltip del último punto -->
+                    <rect x="428" y="218" width="76" height="22" rx="6" fill="#4dd0a0" opacity="0.2"/>
+                    <text x="466" y="233" text-anchor="middle" fill="#4dd0a0" font-size="11" font-family="sans-serif" font-weight="600">+12.4%</text>
+
+                    <!-- ============================================ -->
+                    <!-- DONUT CHART (distribución gastos)            -->
+                    <!-- ============================================ -->
+                    <!-- Segmento 1: Alimentación ~35% -->
+                    <path d="M140,180 L140,100 A80,80 0 0,1 212,138 Z"
+                          fill="#60aff5" opacity="0.85"/>
+                    <!-- Segmento 2: Transporte ~20% -->
+                    <path d="M140,180 L212,138 A80,80 0 0,1 218,220 Z"
+                          fill="#f5a623" opacity="0.8"/>
+                    <!-- Segmento 3: Ocio ~15% -->
+                    <path d="M140,180 L218,220 A80,80 0 0,1 160,255 Z"
+                          fill="#4dd0a0" opacity="0.75"/>
+                    <!-- Segmento 4: Hogar ~30% -->
+                    <path d="M140,180 L160,255 A80,80 0 0,1 140,100 Z"
+                          fill="#f56060" opacity="0.7"/>
+                    <!-- Hueco central -->
+                    <circle cx="140" cy="180" r="45" fill="#0d2137"/>
+                    <!-- Texto central -->
+                    <text x="140" y="176" text-anchor="middle" fill="#ffffff" font-size="13" font-family="sans-serif" font-weight="700">Gastos</text>
+                    <text x="140" y="192" text-anchor="middle" fill="#60aff5" font-size="11" font-family="sans-serif">del mes</text>
+
+                    <!-- Leyenda pequeña del donut -->
+                    <circle cx="246" cy="118" r="4" fill="#60aff5"/>
+                    <text x="254" y="122" fill="#ffffff" opacity="0.6" font-size="10" font-family="sans-serif">Alimentación</text>
+                    <circle cx="246" cy="138" r="4" fill="#f5a623"/>
+                    <text x="254" y="142" fill="#ffffff" opacity="0.6" font-size="10" font-family="sans-serif">Transporte</text>
+                    <circle cx="246" cy="158" r="4" fill="#4dd0a0"/>
+                    <text x="254" y="162" fill="#ffffff" opacity="0.6" font-size="10" font-family="sans-serif">Ocio</text>
+                    <circle cx="246" cy="178" r="4" fill="#f56060"/>
+                    <text x="254" y="182" fill="#ffffff" opacity="0.6" font-size="10" font-family="sans-serif">Hogar</text>
+
+                    <!-- ============================================ -->
+                    <!-- CARDS KPI flotantes                          -->
+                    <!-- ============================================ -->
+                    <!-- Card saldo total -->
+                    <rect x="310" y="60" width="160" height="60" rx="10" fill="#ffffff" opacity="0.07"/>
+                    <rect x="310" y="60" width="160" height="60" rx="10" fill="none" stroke="#ffffff" stroke-width="0.5" opacity="0.18"/>
+                    <text x="325" y="83" fill="#ffffff" opacity="0.55" font-size="10" font-family="sans-serif" font-weight="600" letter-spacing="0.08em">SALDO TOTAL</text>
+                    <text x="325" y="108" fill="#60aff5" font-size="20" font-family="sans-serif" font-weight="700">8.420 €</text>
+
+                    <!-- Card ahorro -->
+                    <rect x="310" y="138" width="160" height="60" rx="10" fill="#ffffff" opacity="0.07"/>
+                    <rect x="310" y="138" width="160" height="60" rx="10" fill="none" stroke="#ffffff" stroke-width="0.5" opacity="0.18"/>
+                    <text x="325" y="161" fill="#ffffff" opacity="0.55" font-size="10" font-family="sans-serif" font-weight="600" letter-spacing="0.08em">INVERSIONES</text>
+                    <text x="325" y="186" fill="#4dd0a0" font-size="20" font-family="sans-serif" font-weight="700">+3.150 €</text>
+
+                    <!-- ============================================ -->
+                    <!-- DECORACIÓN: líneas diagonales finas          -->
+                    <!-- ============================================ -->
+                    <line x1="0"   y1="500" x2="560" y2="460" stroke="#ffffff" stroke-width="0.3" opacity="0.06"/>
+                    <line x1="0"   y1="540" x2="560" y2="500" stroke="#ffffff" stroke-width="0.3" opacity="0.04"/>
+                    <line x1="0"   y1="580" x2="560" y2="545" stroke="#ffffff" stroke-width="0.3" opacity="0.03"/>
+
+                    <!-- ============================================ -->
+                    <!-- TEXTO INFERIOR — tagline                     -->
+                    <!-- ============================================ -->
+                    <text x="60" y="470" fill="#ffffff" opacity="0.85" font-size="22" font-family="sans-serif" font-weight="700">Tu dinero,</text>
+                    <text x="60" y="498" fill="#60aff5" opacity="0.95" font-size="22" font-family="sans-serif" font-weight="700">bajo control.</text>
+                    <text x="60" y="530" fill="#ffffff" opacity="0.4" font-size="12" font-family="sans-serif">Visualiza, analiza y mejora tu economía del hogar.</text>
+
+                </svg>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- MITAD DERECHA — formulario -->
     <div class="login-right">
-
         <div class="login-box">
 
+            <img src="{{ asset('images/logo-texto-lateral-azul.png') }}" alt="HomeFinances" class="logo">
+
             {% if error %}
-                <div class="login-error">
-                    {{ error.messageKey|trans(error.messageData, 'security') }}
+                <div class="login-error-box">
+                    <span class="login-error-icon">⚠</span>
+                    <span>{{ error.messageKey|trans(error.messageData, 'security') }}</span>
                 </div>
             {% endif %}
 
-            <img src="{{ asset('images/logo-texto-lateral-azul.png') }}" alt="Logo Home Finances" class="logo">
+            <form action="{{ path('home') }}" method="post" class="login-form">
 
-            <form action="{{ path('home') }}" method="post" class="card">
-                <label for="username">Email</label>
-                <input type="text" id="username" name="_username" value="{{ last_username }}" required>
+                <div class="login-field-group">
+                    <label class="login-label" for="username">Email</label>
+                    <input type="text" id="username" name="_username"
+                           value="{{ last_username }}" required autocomplete="email"
+                           class="login-input" placeholder="tu@email.com">
+                </div>
 
-                <label for="password">Password</label>
-                <input type="password" id="password" name="_password" required>
+                <div class="login-field-group">
+                    <label class="login-label" for="password">Contraseña</label>
+                    <div class="login-password-wrap">
+                        <input type="password" id="password" name="_password"
+                               required autocomplete="current-password"
+                               class="login-input" placeholder="••••••••">
+                        <button type="button" class="login-toggle-pass" onclick="togglePass()" tabindex="-1" aria-label="Mostrar contraseña">
+                            <svg id="icon-eye" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                                <path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/>
+                                <circle cx="10" cy="10" r="2.5"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
 
-                {# If you want to control the URL the user is redirected to on success
-                <input type="hidden" name="_target_path" value="/account"> #}
+                <button type="submit" class="btn btn-primary login-btn">
+                    Iniciar sesión
+                </button>
 
-                <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
             </form>
 
         </div>
-
     </div>
 
 </div>
 
-    
+<script>
+    function togglePass() {
+        const input = document.getElementById('password');
+        input.type = input.type === 'password' ? 'text' : 'password';
+    }
+</script>
 
 {% endblock %}
-
